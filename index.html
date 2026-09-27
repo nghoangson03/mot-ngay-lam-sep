@@ -1,0 +1,1110 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Một Ngày Làm Sếp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Be+Vietnam+Pro:wght@400;500;600;700&family=Baloo+2:wght@600;700;800&display=swap">
+<style>
+:root{
+  --bg:#17120d; --bg-2:#241b12;
+  --panel:#f4ead6; --panel-alt:#e9d9b4;
+  --ink:#2b2118; --muted:#7a6a55; --line:#d8c7a6;
+  --room-ink:#f3e7cf; --room-muted:#bfae90;
+  --gold:#e2b24a; --gold-2:#b8862b;
+  --felt:#1e5a3f; --felt-2:#154431;
+  --critical:#8c2f2a;
+  --stat-money:#b8862b; --stat-rep:#375c8c; --stat-morale:#1e5a3f; --stat-energy:#7a3b52;
+  --shadow:0 8px 24px rgba(0,0,0,.4);
+  --f-ui:"Be Vietnam Pro",system-ui,"Segoe UI",sans-serif;
+  --f-title:"Playfair Display",Georgia,serif;
+  --f-fun:"Baloo 2","Be Vietnam Pro",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:radial-gradient(ellipse at 50% -10%, var(--bg-2), var(--bg) 60%);color:var(--room-ink);font-family:var(--f-ui);padding-inline:16px;transition:background .6s ease;}
+body[data-ind="logistics"]{background:radial-gradient(ellipse at 50% -10%, #1c2b38, #101820 60%);}
+body[data-ind="fnb"]{background:radial-gradient(ellipse at 50% -10%, #2e1810, #1f120d 60%);}
+body[data-ind="startup"]{background:radial-gradient(ellipse at 50% -10%, #201a34, #131022 60%);}
+body[data-ind="factory"]{background:radial-gradient(ellipse at 50% -10%, #2a201c, #171310 60%);}
+h1,h2,h3{font-family:var(--f-title);text-wrap:balance;margin:0;}
+.mono{font-variant-numeric:tabular-nums;}
+button{font-family:inherit;}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important;}}
+.wrap{max-width:600px;margin:0 auto;padding-block:16px 28px;}
+
+/* start screen */
+.hero-top{text-align:center;margin-bottom:18px;}
+.stamp-badge{display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;
+  border:3px solid var(--gold);color:var(--gold);font-size:30px;transform:rotate(-6deg);margin-bottom:10px;background:#00000022;}
+.hero-top h1{font-size:32px;font-weight:700;color:var(--room-ink);}
+.hero-top p{color:var(--room-muted);margin-top:10px;font-size:14.5px;line-height:1.6;}
+.hero-top strong{color:var(--gold);}
+
+.mode-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:18px;}
+.mode-pill{padding:9px 18px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);
+  font-family:var(--f-fun);font-weight:700;font-size:13.5px;cursor:pointer;}
+.mode-pill.active{background:var(--gold);border-color:var(--gold-2);box-shadow:0 0 0 2px rgba(226,178,74,.35);}
+.mode-pill[data-mode="easy"].active{background:var(--felt);border-color:var(--felt-2);color:#fff;box-shadow:0 0 0 2px rgba(30,90,63,.35);}
+.mode-pill[data-mode="extreme"].active{background:var(--critical);border-color:#6e2320;color:#fff;box-shadow:0 0 0 2px rgba(140,47,42,.35);}
+.mode-hint{text-align:center;color:var(--room-muted);font-size:12.5px;margin-top:8px;}
+
+.industry-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px;}
+@media (max-width:460px){.industry-grid{grid-template-columns:1fr;}}
+.industry-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;text-align:left;cursor:pointer;
+  box-shadow:var(--shadow);transition:transform .15s ease, box-shadow .15s ease;color:var(--ink);}
+.industry-card:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(0,0,0,.45);}
+.industry-card:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.industry-illust{width:100%;border-radius:6px;overflow:hidden;background:#00000015;margin-bottom:10px;}
+.industry-illust svg{display:block;width:100%;height:auto;}
+.industry-icon{font-size:20px;display:inline-block;margin-right:6px;}
+.industry-name{font-family:var(--f-title);font-weight:700;font-size:17px;margin-bottom:4px;display:flex;align-items:center;}
+.industry-teaser{color:var(--muted);font-size:12.5px;line-height:1.45;}
+
+.gallery-box{margin-top:24px;background:#00000030;border:1px dashed var(--line);border-radius:10px;padding:12px 14px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--room-ink);}
+.gallery-box .label{font-size:12.5px;color:var(--room-muted);}
+.gallery-box .count{font-weight:600;font-size:13px;color:var(--gold);}
+.ending-dots{display:flex;gap:5px;flex-wrap:wrap;}
+.ending-dot{width:10px;height:10px;border-radius:50%;background:var(--line);}
+.ending-dot.on{background:var(--gold);}
+
+/* header */
+.game-header{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;}
+.header-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.brandline{display:flex;align-items:center;gap:8px;font-family:var(--f-title);font-weight:700;font-size:16px;color:var(--room-ink);}
+.brandline .mark{width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.week-pill{background:var(--felt);color:var(--room-ink);border:1px solid var(--felt-2);border-radius:999px;padding:5px 13px;font-size:12.5px;font-weight:700;font-family:var(--f-fun);}
+.month-track{height:7px;border-radius:4px;background:#00000040;overflow:hidden;}
+.month-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold-2),var(--gold));transition:width .5s ease;}
+.month-label{display:flex;justify-content:space-between;font-size:12px;color:var(--room-muted);margin-top:4px;}
+
+.ledger-heading{display:none;}
+.stat-ledger{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.stat-row{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 9px;display:flex;align-items:center;gap:8px;position:relative;color:var(--ink);}
+.stat-row.span2{grid-column:1/-1;}
+.stat-row.critical{border-color:var(--critical);box-shadow:0 0 0 2px rgba(140,47,42,.25);}
+.stat-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
+.stat-body{flex:1;min-width:0;}
+.stat-top{display:flex;justify-content:space-between;align-items:baseline;gap:6px;flex-wrap:nowrap;}
+.stat-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.stat-label small{opacity:.7;font-weight:500;font-size:10px;}
+.stat-value{font-weight:700;font-size:13px;color:var(--ink);white-space:nowrap;}
+.stat-track{height:5px;border-radius:3px;background:var(--panel-alt);margin-top:3px;overflow:hidden;position:relative;}
+.stat-fill{height:100%;border-radius:5px;transition:width .5s ease;}
+.kpi-tick{position:absolute;top:-3px;bottom:-3px;width:3px;background:var(--critical);z-index:2;}
+.stat-warn{position:absolute;top:-8px;right:-8px;background:var(--critical);color:#fff;font-size:10px;font-weight:700;
+  border-radius:999px;padding:3px 8px;font-family:var(--f-fun);}
+.delta-badge{position:absolute;top:-12px;left:10px;font-size:12px;font-weight:700;
+  padding:2px 8px;border-radius:999px;animation:floatup .9s ease forwards;font-family:var(--f-fun);}
+.delta-badge.pos{background:var(--felt);color:#fff;}
+.delta-badge.neg{background:var(--critical);color:#fff;}
+@keyframes floatup{from{opacity:0;transform:translateY(4px);}20%{opacity:1;transform:translateY(0);}80%{opacity:1;}to{opacity:0;transform:translateY(-8px);}}
+
+/* event panel */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 16px;box-shadow:var(--shadow);color:var(--ink);}
+.event-tag{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;font-family:var(--f-fun);font-weight:700;}
+.event-tag.type-holiday{color:var(--felt);}
+.event-tag.type-tet, .event-tag.type-endmonth{color:#a33b2a;}
+.panel h2{font-size:22px;margin-bottom:10px;}
+.narrative{font-size:14.5px;line-height:1.6;margin-bottom:14px;}
+.choice-list{display:flex;flex-direction:column;gap:10px;margin-bottom:4px;}
+.choice-btn{display:flex;align-items:flex-start;gap:12px;text-align:left;background:var(--panel-alt);border:1px solid var(--line);
+  border-radius:9px;padding:13px 14px;cursor:pointer;transition:border-color .15s ease, background .15s ease;color:var(--ink);}
+.choice-btn:hover{border-color:var(--gold-2);background:#f1dca8;}
+.choice-btn:focus-visible{outline:2px solid var(--gold-2);outline-offset:2px;}
+.choice-btn:disabled{opacity:.55;cursor:default;}
+.choice-btn.chosen{opacity:1;border-color:var(--gold-2);background:#f1dca8;box-shadow:0 0 0 2px rgba(184,134,43,.35);}
+.choice-letter{flex-shrink:0;width:28px;height:28px;border-radius:50%;border:2px solid var(--gold-2);color:var(--gold-2);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;font-family:var(--f-fun);}
+.choice-label{font-size:14px;line-height:1.45;padding-top:3px;}
+.choice-label small{display:block;margin-top:4px;font-size:12px;line-height:1.4;}
+
+.result-box{margin-top:14px;padding:14px 16px;background:#f1dca8;border-radius:9px;border:1px solid var(--line);}
+.result-box p{margin:0;font-size:13.5px;line-height:1.5;color:var(--ink);}
+.result-effects{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.eff-chip{font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;font-family:var(--f-fun);}
+.eff-chip.pos{background:var(--felt);color:#fff;}
+.eff-chip.neg{background:var(--critical);color:#fff;}
+.eff-chip.zero{background:var(--line);color:var(--ink);}
+.btn-primary{margin-top:14px;width:100%;background:linear-gradient(180deg,var(--gold),var(--gold-2));color:#2b2118;border:none;border-radius:9px;
+  padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--f-fun);box-shadow:0 4px 12px rgba(0,0,0,.3);}
+.btn-primary:hover{filter:brightness(1.06);}
+.btn-secondary{background:transparent;color:var(--gold);border:1px solid var(--gold);border-radius:9px;
+  padding:14px;font-size:15px;font-weight:700;cursor:pointer;width:100%;font-family:var(--f-fun);}
+.btn-rest{margin-top:0;width:100%;border:none;border-radius:9px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;
+  font-family:var(--f-fun);color:#fff;background:linear-gradient(180deg,#8a5a72,#5c2c3d);box-shadow:0 4px 12px rgba(0,0,0,.3);}
+.btn-rest:hover{filter:brightness(1.08);}
+
+/* ending */
+.ending-screen{text-align:center;}
+.win-lose-pill{display:inline-block;padding:6px 18px;border-radius:999px;font-family:var(--f-fun);font-weight:700;font-size:14px;letter-spacing:.04em;margin-bottom:14px;}
+.win-lose-pill.win{background:var(--felt);color:#fff;}
+.win-lose-pill.lose{background:var(--critical);color:#fff;}
+.ending-stamp{display:inline-flex;align-items:center;justify-content:center;width:88px;height:88px;border-radius:50%;
+  border:3px solid var(--critical);color:var(--critical);font-size:40px;transform:rotate(-5deg);margin-bottom:14px;background:#00000022;}
+.ending-stamp.good{border-color:var(--gold);color:var(--gold);}
+.ending-title{font-size:26px;color:var(--room-ink);}
+.ending-desc{color:var(--room-muted);font-size:14.5px;line-height:1.6;margin-top:10px;max-width:480px;margin-inline:auto;}
+.ending-stats{margin-top:22px;text-align:left;}
+.ending-actions{display:flex;gap:10px;margin-top:22px;}
+@media (max-width:420px){.ending-actions{flex-direction:column;}}
+
+.fade-in{animation:fadein .35s ease both;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* EP meter */
+.ep-meter{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#00000025;border-radius:8px;padding:9px 13px;margin:10px 0;}
+.ep-label{font-size:13px;color:var(--room-muted);font-weight:600;}
+.ep-dots{display:flex;gap:5px;}
+.ep-dot{width:13px;height:13px;border-radius:50%;background:#00000040;border:1px solid var(--line);}
+.ep-dot.filled{background:var(--gold);border-color:var(--gold-2);}
+.ep-count{font-size:14px;color:var(--room-ink);font-weight:700;}
+
+/* activity menu */
+.section-label{font-size:13.5px;font-weight:700;color:var(--room-ink);margin:10px 0 6px;font-family:var(--f-title);}
+.activity-list{display:flex;flex-direction:column;gap:7px;}
+.activity-card{display:flex;align-items:center;gap:12px;text-align:left;background:var(--panel-alt);border:1px solid var(--line);
+  border-radius:9px;padding:9px 12px;cursor:pointer;color:var(--ink);width:100%;transition:border-color .15s ease, background .15s ease;}
+.activity-card:hover:not(.done):not(.locked){border-color:var(--gold-2);background:#f1dca8;}
+.activity-card.done{opacity:.72;background:var(--panel);cursor:default;}
+.activity-card.locked{opacity:.45;cursor:not-allowed;}
+.activity-icon{font-size:22px;width:30px;text-align:center;flex-shrink:0;}
+.activity-body{flex:1;min-width:0;}
+.activity-title{font-weight:600;font-size:14px;}
+.activity-note{font-size:12px;color:var(--muted);margin-top:3px;}
+.activity-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;align-items:center;}
+.tag-done{color:var(--felt);font-size:11.5px;font-weight:700;}
+.ep-cost{font-size:11px;color:var(--muted);font-weight:700;}
+.choice-preview{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;}
+.link-back{background:none;border:none;color:var(--gold);font-family:var(--f-fun);font-weight:700;font-size:13px;cursor:pointer;padding:0 0 12px;text-align:left;display:block;}
+.daychoice-actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
+.daychoice-actions button{flex:1;min-width:170px;margin-top:0;}
+
+/* fixed activities as square tiles */
+.fixed-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+@media (max-width:380px){.fixed-grid{grid-template-columns:repeat(2,1fr);}}
+.fixed-tile{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  background:var(--panel-alt);border:1px solid var(--line);border-radius:9px;padding:6px 4px;cursor:pointer;color:var(--ink);gap:2px;overflow:hidden;}
+.fixed-tile:hover:not(.done):not(.locked){border-color:var(--gold-2);background:#f1dca8;}
+.fixed-tile.done{opacity:.65;background:var(--panel);cursor:default;}
+.fixed-tile.locked{opacity:.45;cursor:not-allowed;}
+.fixed-tile .ft-icon{font-size:20px;line-height:1;}
+.fixed-tile .ft-title{font-size:9.5px;font-weight:600;line-height:1.2;}
+.fixed-tile .ft-chips{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;}
+.fixed-tile .ft-chips .eff-chip{font-size:8px;padding:0px 4px;}
+.fixed-tile .ft-cost{font-size:8px;color:var(--muted);font-weight:700;}
+.fixed-tile .ft-done-tag{font-size:8.5px;color:var(--felt);font-weight:700;}
+.fixed-tile .ft-note{font-size:8px;color:var(--muted);line-height:1.2;}
+.fixed-tile.tile-money{border-color:var(--stat-money);}
+.fixed-tile.tile-rep{border-color:var(--stat-rep);}
+.fixed-tile.tile-morale{border-color:var(--stat-morale);}
+.fixed-tile.tile-energy{border-color:var(--stat-energy);}
+.fixed-tile.tile-money .ft-icon{color:var(--stat-money);}
+.fixed-tile.tile-rep .ft-icon{color:var(--stat-rep);}
+.fixed-tile.tile-morale .ft-icon{color:var(--stat-morale);}
+.fixed-tile.tile-energy .ft-icon{color:var(--stat-energy);}
+
+.activity-card{border-left-width:4px;}
+.activity-card.acc-big{border-left-color:var(--gold-2);}
+.activity-card.acc-holiday{border-left-color:var(--felt);}
+.activity-card.acc-tet,.activity-card.acc-endmonth{border-left-color:var(--critical);}
+.activity-card.acc-random{border-left-color:var(--stat-rep);}
+
+/* popups */
+.modal-backdrop{position:fixed;inset:0;background:rgba(10,8,5,.62);display:flex;align-items:center;justify-content:center;padding:18px;z-index:50;}
+.modal-box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 20px;max-width:460px;width:100%;
+  max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.5);color:var(--ink);animation:modalpop .22s ease both;}
+.modal-eyebrow{font-family:var(--f-fun);font-weight:700;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+@keyframes modalpop{from{opacity:0;transform:scale(.94) translateY(8px);}to{opacity:1;transform:scale(1) translateY(0);}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+(function(){
+  var MONEY_MULT = 5;
+  var STAT_META = {
+    money:{label:'Quỹ công ty', icon:'💰', color:'var(--stat-money)'},
+    rep:{label:'Uy tín', icon:'⭐', color:'var(--stat-rep)'},
+    morale:{label:'Tinh thần NV', icon:'😊', color:'var(--stat-morale)'},
+    energy:{label:'Sức khỏe', icon:'🔋', color:'var(--stat-energy)'}
+  };
+  var STAT_ORDER = ['money','rep','morale','energy'];
+  var WEEKDAY_VN = ['Chủ Nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
+  var MONTH_NAMES_VN = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+
+  var MODES = {
+    easy:{label:'Dễ', start:{money:65,rep:60,morale:65,energy:75}, kpi:60, driftBase:0.5, failFloor:0},
+    hard:{label:'Khó', start:{money:50,rep:50,morale:50,energy:60}, kpi:76, driftBase:0.65, failFloor:6},
+    extreme:{label:'Siêu Khó', start:{money:32,rep:38,morale:38,energy:42}, kpi:90, driftBase:0.85, failFloor:15}
+  };
+  var EP_BY_MODE = {easy:4, hard:3, extreme:2};
+  var FIXED_ACTIVITIES = [
+    {key:'finance', title:'Duyệt tài chính', icon:'📊', ep:1, tile:'money', fx:[6,0,0,-2], out:'Bạn rà soát sổ sách, thu chi trong ngày đã được cập nhật.'},
+    {key:'people', title:'Thăm hỏi nhân viên', icon:'👥', ep:1, tile:'morale', fx:[0,0,6,-1], out:'Một vòng thăm hỏi ngắn giúp mọi người thấy được quan tâm.'},
+    {key:'client', title:'Chăm sóc khách hàng/đối tác', icon:'🤝', ep:2, tile:'rep', fx:[0,10,0,-3], out:'Một buổi gặp gỡ trọn vẹn giúp giữ mối quan hệ luôn ấm.'},
+    {key:'selfcare', title:'Nghỉ giải lao tại chỗ', icon:'☕', ep:1, tile:'energy', fx:[-1,0,0,6], out:'Một tách cà phê và vài phút thở giúp bạn tỉnh táo hơn.'}
+  ];
+
+  var ILLUST = {
+    logistics:'<svg viewBox="0 0 140 90"><defs><linearGradient id="skyL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c4157"/><stop offset="1" stop-color="#182636"/></linearGradient><linearGradient id="bodyL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0c268"/><stop offset="1" stop-color="#b8862b"/></linearGradient></defs><rect width="140" height="90" fill="url(#skyL)"/><rect y="72" width="140" height="18" fill="#11161d"/><rect y="72" width="140" height="3" fill="#3d5570"/><path d="M6 32h16M4 26h11M8 40h13" stroke="#9fb6cf" stroke-width="2.5" stroke-linecap="round" opacity=".55"/><rect x="14" y="36" width="62" height="32" rx="5" fill="url(#bodyL)"/><rect x="14" y="36" width="62" height="7" rx="3.5" fill="#fff6df" opacity=".4"/><rect x="82" y="44" width="32" height="24" rx="5" fill="#e2b24a"/><rect x="88" y="48" width="15" height="11" rx="2" fill="#dff0ff" opacity=".9"/><rect x="14" y="62" width="98" height="7" fill="#241a10"/><circle cx="38" cy="70" r="9" fill="#100c08"/><circle cx="38" cy="70" r="3.6" fill="#9a8863"/><circle cx="98" cy="70" r="9" fill="#100c08"/><circle cx="98" cy="70" r="3.6" fill="#9a8863"/></svg>',
+    fnb:'<svg viewBox="0 0 140 90"><defs><linearGradient id="bowlF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e2b24a"/><stop offset="1" stop-color="#9c6a1c"/></linearGradient></defs><rect width="140" height="90" fill="#241a10"/><path d="M18 46h104l-8 16c-6 12-24 20-44 20s-38-8-44-20z" fill="url(#bowlF)"/><ellipse cx="70" cy="46" rx="52" ry="13" fill="#f4d78a"/><ellipse cx="70" cy="46" rx="52" ry="13" fill="none" stroke="#9c6a1c" stroke-width="2"/><path d="M46 42q8-6 0-12M62 40q8-6 0-12M78 40q8-6 0-12M94 42q8-6 0-12" stroke="#c0431f" stroke-width="3" fill="none" stroke-linecap="round" opacity=".85"/><circle cx="58" cy="45" r="4" fill="#c0431f"/><circle cx="82" cy="45" r="4" fill="#3f7a4a"/><path d="M50 16q-3 9 2 15M60 12q-3 9 2 15M70 16q-3 9 2 15" stroke="#d8c7a6" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".6"/><rect x="96" y="18" width="3" height="26" rx="1.5" fill="#d8c7a6" transform="rotate(18 97 31)"/><rect x="104" y="18" width="3" height="26" rx="1.5" fill="#d8c7a6" transform="rotate(18 105 31)"/></svg>',
+    startup:'<svg viewBox="0 0 140 90"><defs><linearGradient id="bodyS" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5079b0"/><stop offset="1" stop-color="#2f4f7a"/></linearGradient><radialGradient id="flameS" cx="0.5" cy="0" r="0.9"><stop offset="0" stop-color="#ffe08a"/><stop offset=".55" stop-color="#e2b24a"/><stop offset="1" stop-color="#b8862b"/></radialGradient></defs><rect width="140" height="90" fill="#151327"/><circle cx="24" cy="20" r="1.6" fill="#f4ead6" opacity=".8"/><circle cx="112" cy="16" r="1.3" fill="#f4ead6" opacity=".6"/><circle cx="118" cy="40" r="1.8" fill="#f4ead6" opacity=".7"/><circle cx="20" cy="52" r="1.3" fill="#f4ead6" opacity=".5"/><path d="M70 8c12 10 16 24 16 38h-32c0-14 4-28 16-38z" fill="url(#bodyS)"/><rect x="54" y="46" width="32" height="20" rx="3" fill="#e2b24a"/><circle cx="70" cy="30" r="7" fill="#dff0ff"/><circle cx="70" cy="30" r="7" fill="none" stroke="#2f4f7a" stroke-width="2"/><path d="M54 50l-14 16 14-4z" fill="#8c2f2a"/><path d="M86 50l14 16-14-4z" fill="#8c2f2a"/><path d="M58 66h24l-8 20c-2 4-6 4-8 0z" fill="url(#flameS)"/></svg>',
+    factory:'<svg viewBox="0 0 140 90"><defs><linearGradient id="wallFa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8f4d68"/><stop offset="1" stop-color="#5c2c3d"/></linearGradient></defs><rect width="140" height="90" fill="#1c1512"/><ellipse cx="104" cy="10" rx="9" ry="6" fill="#bfae90" opacity=".35"/><ellipse cx="118" cy="16" rx="10" ry="6" fill="#bfae90" opacity=".3"/><ellipse cx="112" cy="24" rx="8" ry="5" fill="#bfae90" opacity=".25"/><rect x="96" y="20" width="9" height="26" fill="#2b2118"/><rect x="112" y="26" width="9" height="20" fill="#2b2118"/><rect x="14" y="44" width="112" height="34" fill="url(#wallFa)"/><path d="M14 44l14-16h84l14 16z" fill="#3f1f2b"/><path d="M28 44l6-10h8l-4 10zM50 44l6-10h8l-4 10zM72 44l6-10h8l-4 10zM94 44l6-10h8l-4 10z" fill="#5c2c3d" opacity=".6"/><rect x="24" y="54" width="13" height="13" fill="#f4ead6" opacity=".92"/><rect x="50" y="54" width="13" height="13" fill="#f4ead6" opacity=".92"/><rect x="76" y="54" width="13" height="13" fill="#f4ead6" opacity=".92"/><rect x="102" y="54" width="13" height="13" fill="#f4ead6" opacity=".92"/><rect x="14" y="78" width="112" height="4" fill="#0e0a08"/></svg>'
+  };
+
+  var INDUSTRIES = {
+    logistics:{
+      name:'Logistics & Vận Tải', icon:'🚚', base:18,
+      teaser:'Điều phối xe, đơn gấp, khách khó tính và những ca bảo trì lúc nửa đêm.',
+      place:'công ty vận tải', role:'đội xe',
+      events:[
+        {title:'Lô hàng VIP mắc kẹt',text:'Xe chở lô hàng gấp cho khách VIP bị kẹt vì tắc đường. Tài xế xin đổi lộ trình nhưng tốn thêm phí cầu đường.',opts:[
+          {l:'A',t:'Duyệt chi thêm phí, giao đúng hẹn',fx:[-10,15,0,0],out:'Khách VIP nhận hàng đúng giờ, hài lòng ra mặt.'},
+          {l:'B',t:'Từ chối, chấp nhận giao trễ',fx:[5,-15,0,0],out:'Khách VIP phàn nàn thẳng lên tổng đài.'},
+          {l:'C',t:'Gọi xin lỗi trước, chia sẻ một phần phí',fx:[-5,8,0,-5],out:'Khách hơi khó chịu nhưng thông cảm phần nào.'}
+        ]},
+        {title:'Bảo trì xe sớm',text:'Đội xe đề xuất bảo trì định kỳ sớm hơn lịch để đảm bảo an toàn, dù tốn thêm chi phí.',opts:[
+          {l:'A',t:'Chi tiền bảo trì toàn bộ ngay',fx:[-15,0,10,0],out:'Tài xế yên tâm, xe chạy êm hẳn.'},
+          {l:'B',t:'Trì hoãn, chạy tiếp như cũ',fx:[5,0,-10,0],out:'Vài tài xế lo lắng về độ an toàn.'},
+          {l:'C',t:'Bảo trì phần cấp thiết nhất trước',fx:[-8,0,5,-5],out:'Giải quyết được rủi ro lớn nhất trước mắt.'}
+        ]},
+        {title:'Tài xế bị khách mắng',text:'Một tài xế báo bị khách hàng lớn tiếng mắng vô lý ngay tại điểm giao hàng, đòi nghỉ việc.',opts:[
+          {l:'A',t:'Đứng về phía tài xế, cảnh cáo khách',fx:[0,-5,15,0],out:'Tài xế cảm kích, đội xe thêm tin tưởng sếp.'},
+          {l:'B',t:'Xin lỗi khách, nhắc tài xế nhịn',fx:[0,5,-15,0],out:'Khách hài lòng nhưng tài xế thấy tủi thân.'},
+          {l:'C',t:'Gọi hoà giải, sếp làm trung gian',fx:[0,3,8,-10],out:'Cả hai bên nguôi giận sau cuộc gọi dài.'}
+        ]},
+        {title:'Đối thủ giảm giá',text:'Đối thủ cạnh tranh bất ngờ giảm giá cước 15% để giành thị phần khách hàng doanh nghiệp.',opts:[
+          {l:'A',t:'Giảm giá theo để giữ khách',fx:[-15,10,0,0],out:'Giữ được phần lớn khách hàng cũ.'},
+          {l:'B',t:'Giữ giá, tập trung chất lượng dịch vụ',fx:[5,-5,0,-5],out:'Mất vài khách nhỏ nhưng khách lớn vẫn ở lại.'},
+          {l:'C',t:'Giữ giá, tặng thêm theo dõi đơn real-time',fx:[-5,8,0,-8],out:'Khách hàng khen tính năng mới, chịu ở lại.'}
+        ]},
+        {title:'Nghi thất thoát hàng hoá',text:'Kho hàng phát hiện thiếu một số kiện hàng, nghi có nhân viên nội bộ lấy cắp.',opts:[
+          {l:'A',t:'Điều tra, lắp camera giám sát kho',fx:[-10,5,-10,0],out:'Tìm ra sơ hở quy trình, không khí kho hơi căng.'},
+          {l:'B',t:'Bỏ qua, coi như hao hụt vận hành',fx:[-15,0,5,0],out:'Thất thoát vẫn âm thầm tiếp diễn.'},
+          {l:'C',t:'Họp toàn kho cảnh báo chung, giám sát nhẹ',fx:[-5,3,-3,-5],out:'Tình hình lắng xuống nhưng chưa triệt để.'}
+        ]},
+        {title:'Đề xuất tăng ca cao điểm',text:'Nhân viên kho đề xuất tăng ca dịp cao điểm để kịp giao đơn hàng tồn đọng.',opts:[
+          {l:'A',t:'Đồng ý tăng ca, trả lương OT đầy đủ',fx:[-10,10,5,0],out:'Đơn hàng được giải phóng đúng hẹn.'},
+          {l:'B',t:'Từ chối, chấp nhận giao chậm',fx:[0,-10,0,-5],out:'Khách hàng bắt đầu sốt ruột.'},
+          {l:'C',t:'Tăng ca một phần, thuê thêm thời vụ',fx:[-8,5,8,-5],out:'Cân được tiến độ mà không ai quá tải.'}
+        ]},
+        {title:'Tai nạn nhỏ trên cao tốc',text:'Xe container gặp tai nạn nhẹ, không ai bị thương nhưng một phần hàng hoá hư hỏng.',opts:[
+          {l:'A',t:'Đền bù đầy đủ cho khách ngay',fx:[-20,15,0,0],out:'Khách đánh giá cao cách xử lý chuyên nghiệp.'},
+          {l:'B',t:'Thương lượng đền bù một phần',fx:[-5,-10,0,0],out:'Khách không hài lòng, đe doạ tìm đối tác khác.'},
+          {l:'C',t:'Đền một phần, tặng voucher lần sau',fx:[-10,8,0,-5],out:'Khách nguôi giận, còn giữ mối quan hệ.'}
+        ]},
+        {title:'Kiểm tra đột xuất',text:'Cơ quan quản lý kiểm tra đột xuất giấy tờ xe và tải trọng ngay tại bến bãi.',opts:[
+          {l:'A',t:'Hợp tác đầy đủ, minh bạch giấy tờ',fx:[0,10,0,-10],out:'Đoàn kiểm tra ghi nhận công ty làm ăn nghiêm túc.'},
+          {l:'B',t:'Tìm cách "linh động" qua kiểm tra',fx:[5,-20,0,0],out:'Qua được lần này nhưng để lại rủi ro về sau.'},
+          {l:'C',t:'Báo cáo trước, xin bổ sung giấy tờ thiếu',fx:[-5,5,0,-8],out:'Đoàn kiểm tra thông cảm, chỉ nhắc nhở nhẹ.'}
+        ]},
+        {title:'Kho quá tải dịp lễ',text:'Đơn hàng dồn dập dịp lễ khiến kho quá tải, nhân viên làm không xuể.',opts:[
+          {l:'A',t:'Sếp trực tiếp xuống kho hỗ trợ',fx:[0,0,15,-20],out:'Cả kho nể phục tinh thần của sếp.'},
+          {l:'B',t:'Thuê thêm nhân công thời vụ gấp',fx:[-15,0,5,-5],out:'Đơn hàng được giải quyết kịp, tốn thêm ngân sách.'},
+          {l:'C',t:'Chia ca linh hoạt, hỗ trợ một buổi',fx:[-5,0,8,-10],out:'Áp lực được san đều, không ai kiệt sức quá mức.'}
+        ]},
+        {title:'Hợp đồng dài hạn ép giá',text:'Một khách hàng lớn đề nghị hợp đồng vận chuyển dài hạn nhưng ép giá khá thấp.',opts:[
+          {l:'A',t:'Chấp nhận để có nguồn thu ổn định',fx:[10,5,0,-5],out:'Có đơn hàng đều đặn nhưng biên lợi nhuận mỏng.'},
+          {l:'B',t:'Từ chối, giữ giá trị dịch vụ',fx:[-5,10,0,0],out:'Mất một khách lớn nhưng giữ được vị thế.'},
+          {l:'C',t:'Đàm phán mức giá trung gian, tăng dần theo năm',fx:[3,8,0,-8],out:'Cả hai bên đều thấy đây là thoả thuận công bằng.'}
+        ]}
+      ]
+    },
+    fnb:{
+      name:'Chuỗi Nhà Hàng', icon:'🍜', base:10,
+      teaser:'Bếp núc, khách hàng, review mạng xã hội và cơn sốt cuối tuần.',
+      place:'chuỗi nhà hàng', role:'quán',
+      events:[
+        {title:'Nguyên liệu không đạt chuẩn',text:'Đầu bếp chính báo nguyên liệu tươi sống hôm nay không đạt chuẩn để chế biến.',opts:[
+          {l:'A',t:'Hủy món, tạm đóng vài món trong menu',fx:[-10,10,0,0],out:'Khách hơi tiếc nhưng khen quán có tâm.'},
+          {l:'B',t:'Vẫn chế biến, tiết kiệm chi phí',fx:[10,-15,0,0],out:'Có khách phàn nàn món ăn không tươi.'},
+          {l:'C',t:'Đổi nhà cung cấp khẩn cấp, chỉ hủy món ảnh hưởng',fx:[-5,5,0,-8],out:'Menu gần như nguyên vẹn, khách không nhận ra khác biệt.'}
+        ]},
+        {title:'Nhân viên xin tăng lương',text:'Nhân viên phục vụ xin tăng lương vì khối lượng công việc tăng dịp cuối tuần.',opts:[
+          {l:'A',t:'Đồng ý tăng lương',fx:[-10,0,15,0],out:'Nhân viên làm việc hào hứng hẳn.'},
+          {l:'B',t:'Từ chối, giải thích khó khăn tài chính',fx:[5,0,-15,0],out:'Không khí quán hơi chùng xuống.'},
+          {l:'C',t:'Tăng một phần, thưởng theo doanh thu',fx:[-5,0,8,-5],out:'Nhân viên chấp nhận, còn kỳ vọng vào cuối tháng.'}
+        ]},
+        {title:'Khách "bùng nổ" trên mạng xã hội',text:'Một khách hàng đăng bài chê phục vụ chậm, bài viết lan truyền nhanh.',opts:[
+          {l:'A',t:'Liên hệ xin lỗi, tặng voucher',fx:[-5,10,0,0],out:'Khách xoá bài, còn khen quán biết lắng nghe.'},
+          {l:'B',t:'Không phản hồi, coi là chuyện nhỏ',fx:[0,-15,0,0],out:'Bài viết càng lúc càng nhiều bình luận tiêu cực.'},
+          {l:'C',t:'Gọi riêng xin lỗi, mời quay lại miễn phí',fx:[-8,8,0,-5],out:'Khách hài lòng, âm thầm gỡ bài.'}
+        ]},
+        {title:'Đề nghị hợp tác độc quyền',text:'Đối tác giao đồ uống đề nghị hợp tác độc quyền, đổi lại giá tốt hơn.',opts:[
+          {l:'A',t:'Ký hợp tác độc quyền',fx:[10,-5,0,0],out:'Chi phí đồ uống giảm nhưng menu kém đa dạng.'},
+          {l:'B',t:'Từ chối, giữ nhiều nhà cung cấp',fx:[-5,5,0,0],out:'Menu đa dạng nhưng chi phí không đổi.'},
+          {l:'C',t:'Hợp tác độc quyền nhưng chỉ thử nghiệm 6 tháng',fx:[5,3,0,-5],out:'Có thêm lựa chọn để đánh giá lại sau.'}
+        ]},
+        {title:'Phát hiện gián trong kho',text:'Nhân viên bếp phát hiện gián trong kho nguyên liệu, cần xử lý trước khi bị thanh tra.',opts:[
+          {l:'A',t:'Đóng cửa nửa ngày, tổng vệ sinh',fx:[-15,15,0,-10],out:'Quán sạch bong, khách không hề hay biết có chuyện gì.'},
+          {l:'B',t:'Xử lý âm thầm, vẫn mở cửa bán',fx:[5,-20,0,0],out:'Có khách phát hiện, chụp ảnh đăng lên mạng.'},
+          {l:'C',t:'Xử lý ngay trong đêm, mở cửa bình thường sáng sau',fx:[-10,8,0,-12],out:'Vấn đề được giải quyết gọn mà không ảnh hưởng doanh thu.'}
+        ]},
+        {title:'Đề xuất ca làm linh hoạt',text:'Nhân viên đề xuất lịch làm việc linh hoạt hơn để cân bằng cuộc sống.',opts:[
+          {l:'A',t:'Đồng ý lịch linh hoạt',fx:[0,0,15,-5],out:'Nhân viên gắn bó hơn hẳn với quán.'},
+          {l:'B',t:'Giữ ca cố định như cũ',fx:[0,0,-10,0],out:'Vài nhân viên tỏ ra kém nhiệt tình.'},
+          {l:'C',t:'Thử nghiệm cho một nhóm nhỏ trước',fx:[0,0,8,-5],out:'Nhóm thử nghiệm rất hài lòng, số khác đang chờ.'}
+        ]},
+        {title:'Reviewer nổi tiếng ghé quán',text:'Một reviewer ẩm thực có tiếng ghé quán bất ngờ, không báo trước.',opts:[
+          {l:'A',t:'Sếp đích thân ra tiếp đón',fx:[0,20,0,-15],out:'Bài review sau đó khen hết lời.'},
+          {l:'B',t:'Để nhân viên phục vụ như bình thường',fx:[0,0,0,0],out:'Trải nghiệm bình thường, review chung chung.'},
+          {l:'C',t:'Kín đáo nhắc nhân viên chỉn chu hơn',fx:[0,10,0,-8],out:'Review khá tích cực mà không ai nhận ra có gì khác.'}
+        ]},
+        {title:'Giá nguyên liệu tăng đột biến',text:'Giá nguyên liệu đầu vào tăng mạnh do thời tiết bất lợi.',opts:[
+          {l:'A',t:'Tăng giá toàn bộ menu',fx:[10,-10,0,0],out:'Vài khách quen thắc mắc về giá mới.'},
+          {l:'B',t:'Giữ giá, chấp nhận giảm lợi nhuận',fx:[-15,10,0,0],out:'Khách khen quán giữ giá tốt giữa thời buổi khó khăn.'},
+          {l:'C',t:'Tăng nhẹ vài món cao cấp, giữ món phổ thông',fx:[3,3,0,-5],out:'Hầu như không ai để ý có gì thay đổi.'}
+        ]},
+        {title:'Cuối tuần đông khách kỷ lục',text:'Lượng khách cuối tuần lập kỷ lục, bếp quá tải, khách phải chờ lâu.',opts:[
+          {l:'A',t:'Sếp vào bếp phụ nấu cùng nhân viên',fx:[0,5,15,-20],out:'Tốc độ phục vụ cải thiện rõ rệt.'},
+          {l:'B',t:'Xin lỗi khách, tặng nước miễn phí khi chờ',fx:[-5,10,0,0],out:'Khách vui vẻ chờ thêm mà không phàn nàn.'},
+          {l:'C',t:'Gọi thêm nhân viên part-time gấp trong ngày',fx:[-10,5,5,0],out:'Bếp vận hành trơn tru hơn hẳn.'}
+        ]},
+        {title:'Đề nghị nhượng quyền thương hiệu',text:'Một nhà đầu tư ngỏ ý muốn nhượng quyền thương hiệu quán ra nhiều chi nhánh.',opts:[
+          {l:'A',t:'Đồng ý nhượng quyền, mở rộng nhanh',fx:[20,-5,0,0],out:'Thương hiệu phủ sóng nhanh nhưng khó kiểm soát chất lượng đồng bộ.'},
+          {l:'B',t:'Từ chối, giữ quán như hiện tại',fx:[-5,10,0,0],out:'Quán vẫn giữ được chất riêng vốn có.'},
+          {l:'C',t:'Đồng ý nhưng giữ kiểm soát chất lượng qua đào tạo',fx:[10,5,0,-8],out:'Mở rộng chậm hơn nhưng chắc chắn hơn.'}
+        ]}
+      ]
+    },
+    startup:{
+      name:'Startup Công Nghệ', icon:'🚀', base:8,
+      teaser:'Gọi vốn, giữ người tài, server sập lúc nửa đêm.',
+      place:'startup', role:'startup',
+      events:[
+        {title:'Demo lỗi ngay trước buổi pitch',text:'Sản phẩm demo bất ngờ lỗi ngay trước buổi pitch quan trọng với quỹ đầu tư.',opts:[
+          {l:'A',t:'Hoãn pitch, xin lỗi quỹ đầu tư',fx:[0,-10,0,5],out:'Quỹ đầu tư tỏ ra hơi nghi ngại.'},
+          {l:'B',t:'Cả team thức đêm fix kịp giờ pitch',fx:[0,15,-15,-15],out:'Buổi pitch suôn sẻ, nhưng team rã rời.'},
+          {l:'C',t:'Pitch bằng video quay sẵn, demo trực tiếp sau',fx:[0,5,0,-8],out:'Quỹ đầu tư đồng ý chờ thêm, có phần ấn tượng.'}
+        ]},
+        {title:'Nhân sự chủ chốt được offer gấp đôi',text:'Một lập trình viên nòng cốt nhận được lời mời lương gấp đôi từ công ty khác.',opts:[
+          {l:'A',t:'Thương lượng giữ chân bằng cổ phần ESOP',fx:[-5,0,15,0],out:'Bạn ấy quyết định ở lại, gắn bó hơn với startup.'},
+          {l:'B',t:'Để nhân sự đó ra đi',fx:[5,0,-15,0],out:'Team mất đi một mắt xích quan trọng.'},
+          {l:'C',t:'Đề nghị lộ trình tăng lương theo mốc',fx:[-3,0,10,-5],out:'Bạn ấy ở lại nhưng còn đang cân nhắc.'}
+        ]},
+        {title:'Tin đồn sao chép ý tưởng',text:'Có tin đồn lan truyền rằng sản phẩm sao chép ý tưởng từ một startup khác.',opts:[
+          {l:'A',t:'Công khai minh bạch quá trình phát triển',fx:[0,15,0,-10],out:'Cộng đồng công nghệ đánh giá cao sự minh bạch.'},
+          {l:'B',t:'Im lặng, không phản hồi',fx:[0,-15,0,0],out:'Tin đồn càng lan rộng hơn.'},
+          {l:'C',t:'Trao đổi riêng với bên tố cáo trước',fx:[0,8,0,-8],out:'Hiểu lầm được giải quyết êm đẹp trước khi ồn ào.'}
+        ]},
+        {title:'Nhà đầu tư đòi 40% cổ phần',text:'Một nhà đầu tư thiên thần đề nghị rót vốn nhưng đòi tới 40% cổ phần.',opts:[
+          {l:'A',t:'Chấp nhận đổi lấy vốn',fx:[25,-5,0,0],out:'Có vốn ngay nhưng mất phần lớn quyền kiểm soát.'},
+          {l:'B',t:'Từ chối, tìm nguồn vốn khác',fx:[-10,5,0,0],out:'Mất thời gian tìm nhà đầu tư mới.'},
+          {l:'C',t:'Đàm phán xuống còn 25% cổ phần',fx:[12,3,0,-8],out:'Cả hai bên đạt thoả thuận chấp nhận được.'}
+        ]},
+        {title:'Server sập giữa đêm',text:'Server sập đột ngột giữa đêm, khách hàng doanh nghiệp phàn nàn dữ dội.',opts:[
+          {l:'A',t:'Sếp trực tiếp thức đêm xử lý cùng team',fx:[0,10,0,-20],out:'Sự cố được khắc phục nhanh, khách hàng ghi nhận.'},
+          {l:'B',t:'Thuê dịch vụ vận hành ngoài xử lý gấp',fx:[-20,0,0,-5],out:'Sự cố được xử lý nhưng tốn khá nhiều chi phí.'},
+          {l:'C',t:'Sếp cùng vài kỹ sư nòng cốt xử lý',fx:[0,8,5,-15],out:'Team nòng cốt xử lý gọn, phần còn lại được nghỉ ngơi.'}
+        ]},
+        {title:'Đề xuất họp ít lại',text:'Nhân viên đề xuất giảm số buổi họp để có nhiều thời gian tập trung code hơn.',opts:[
+          {l:'A',t:'Đồng ý cắt giảm họp không cần thiết',fx:[0,0,15,5],out:'Năng suất code cải thiện thấy rõ.'},
+          {l:'B',t:'Giữ nguyên lịch họp báo cáo hàng ngày',fx:[0,0,-10,0],out:'Team cảm thấy hơi ngột ngạt.'},
+          {l:'C',t:'Gộp còn 2 buổi họp mỗi tuần',fx:[0,0,10,-3],out:'Vừa đủ thông tin, vừa có thời gian tập trung.'}
+        ]},
+        {title:'Đối thủ ra mắt tính năng tương tự',text:'Một đối thủ vừa ra mắt tính năng gần giống sản phẩm, đi trước một bước.',opts:[
+          {l:'A',t:'Dồn lực release gấp, bỏ qua kiểm thử kỹ',fx:[-5,10,0,-15],out:'Ra mắt kịp nhưng vài lỗi nhỏ xuất hiện sau đó.'},
+          {l:'B',t:'Giữ tiến độ cũ, làm chắc chắn',fx:[0,-5,0,5],out:'Sản phẩm chắc chắn nhưng chậm hơn đối thủ.'},
+          {l:'C',t:'Release bản beta giới hạn cho nhóm nhỏ trước',fx:[-3,5,0,-8],out:'Nhận được phản hồi sớm để hoàn thiện dần.'}
+        ]},
+        {title:'Báo công nghệ mời phỏng vấn',text:'Một trang báo công nghệ lớn muốn phỏng vấn về tầm nhìn của công ty.',opts:[
+          {l:'A',t:'Nhận lời, đầu tư chuẩn bị kỹ',fx:[0,15,0,-10],out:'Bài phỏng vấn được chia sẻ rộng rãi.'},
+          {l:'B',t:'Từ chối, tập trung vào sản phẩm',fx:[0,-5,0,5],out:'Startup ít được biết đến hơn trong giới truyền thông.'},
+          {l:'C',t:'Nhận lời nhưng giữ ngắn gọn, không rườm rà',fx:[0,8,0,-5],out:'Bài phỏng vấn ngắn nhưng đủ ấn tượng.'}
+        ]},
+        {title:'Quỹ đầu tư yêu cầu cắt giảm nhân sự',text:'Trước khi chốt vòng Series A, quỹ đầu tư yêu cầu cắt giảm nhân sự để "gọn" chi phí.',opts:[
+          {l:'A',t:'Chấp nhận cắt giảm một phần nhân sự',fx:[20,0,-20,0],out:'Vòng vốn được chốt nhưng không khí team nặng nề.'},
+          {l:'B',t:'Từ chối, thuyết phục quỹ bằng kế hoạch khác',fx:[-10,0,15,-10],out:'Quỹ đầu tư cân nhắc thêm, team vẫn nguyên vẹn.'},
+          {l:'C',t:'Đề xuất giảm lương tự nguyện thay vì cắt người',fx:[8,0,-8,-10],out:'Không ai bị cho nghỉ nhưng ai cũng chịu thiệt một ít.'}
+        ]},
+        {title:'Cả team kiệt sức cuối tuần',text:'Sau một tuần căng thẳng, cả team đều kiệt sức rõ rệt.',opts:[
+          {l:'A',t:'Cho cả team nghỉ bù, đóng cửa văn phòng 1 ngày',fx:[-5,0,20,10],out:'Ai cũng hồi phục tinh thần rõ rệt.'},
+          {l:'B',t:'Tiếp tục làm việc để bắt kịp deadline',fx:[10,0,-15,-15],out:'Deadline được giữ nhưng ai cũng đuối sức.'},
+          {l:'C',t:'Nghỉ nửa ngày, còn lại làm online nhẹ nhàng',fx:[3,0,10,3],out:'Vừa kịp tiến độ, vừa có thời gian thở.'}
+        ]}
+      ]
+    },
+    factory:{
+      name:'Nhà Máy Sản Xuất', icon:'🏭', base:40,
+      teaser:'Dây chuyền, đơn hàng xuất khẩu, an toàn lao động và áp lực từ tập đoàn mẹ.',
+      place:'nhà máy', role:'nhà máy',
+      events:[
+        {title:'Dây chuyền phát hiện lỗi kỹ thuật',text:'Dây chuyền sản xuất phát hiện lỗi kỹ thuật, một lô hàng xuất khẩu có nguy cơ trễ hẹn.',opts:[
+          {l:'A',t:'Dừng dây chuyền để sửa triệt để',fx:[-15,-5,0,-5],out:'Lỗi được xử lý dứt điểm nhưng lô hàng giao trễ.'},
+          {l:'B',t:'Chạy tiếp, cho công nhân tăng tốc bù lỗi',fx:[5,-15,-10,0],out:'Giao kịp hẹn nhưng chất lượng vài sản phẩm đáng ngại.'},
+          {l:'C',t:'Sửa tại chỗ, huy động thêm ca đêm',fx:[-10,5,-10,-10],out:'Giao đúng hẹn, nhưng công nhân khá mệt mỏi.'}
+        ]},
+        {title:'Đề xuất bảo hộ lao động',text:'Công đoàn đề xuất trang bị thêm bảo hộ lao động sau một vụ suýt tai nạn.',opts:[
+          {l:'A',t:'Duyệt ngay ngân sách trang bị đầy đủ',fx:[-15,0,15,0],out:'Công nhân an tâm làm việc hơn hẳn.'},
+          {l:'B',t:'Từ chối, viện lý do ngân sách quý này',fx:[5,0,-20,0],out:'Công nhân bất bình, bàn tán khắp xưởng.'},
+          {l:'C',t:'Trang bị dần theo khu vực ưu tiên nhất',fx:[-8,0,8,-5],out:'Rủi ro lớn nhất được xử lý trước.'}
+        ]},
+        {title:'Giá nguyên liệu nhập khẩu tăng',text:'Đối tác nhập khẩu nguyên liệu báo giá tăng 20% do biến động tỷ giá.',opts:[
+          {l:'A',t:'Chấp nhận giá mới để giữ nguồn cung',fx:[-15,5,0,0],out:'Sản xuất không bị gián đoạn.'},
+          {l:'B',t:'Tìm nhà cung cấp trong nước thay thế gấp',fx:[5,-8,0,-10],out:'Nguồn cung mới chưa ổn định như kỳ vọng.'},
+          {l:'C',t:'Đàm phán chia sẻ một phần chi phí tăng',fx:[-8,3,0,-8],out:'Đối tác đồng ý gánh một phần, dễ thở hơn.'}
+        ]},
+        {title:'QC phát hiện lô hàng lỗi',text:'Bộ phận QC phát hiện 5% sản phẩm lô mới không đạt chuẩn xuất khẩu.',opts:[
+          {l:'A',t:'Hủy toàn bộ lô, sản xuất lại từ đầu',fx:[-20,10,0,0],out:'Chất lượng được đảm bảo tuyệt đối cho lô hàng mới.'},
+          {l:'B',t:'Vẫn xuất hàng, coi là sai số chấp nhận được',fx:[10,-20,0,0],out:'Rủi ro bị khách hàng trả hàng tăng cao.'},
+          {l:'C',t:'Phân loại lại, phần đạt chuẩn xuất khẩu, phần lỗi bán nội địa',fx:[-5,5,0,-8],out:'Giảm thiểu thiệt hại mà vẫn giữ được lô hàng chính.'}
+        ]},
+        {title:'Công nhân bị thương do máy cũ',text:'Một công nhân bị thương nhẹ do máy móc cũ, cần quyết định xử lý ngay.',opts:[
+          {l:'A',t:'Đưa đi viện, chi trả toàn bộ viện phí công khai',fx:[-10,5,15,0],out:'Công nhân cảm kích, cả xưởng thêm tin tưởng sếp.'},
+          {l:'B',t:'Xử lý nội bộ nhanh gọn, giảm ồn ào',fx:[5,-5,-15,0],out:'Công nhân cảm thấy bị xem nhẹ.'},
+          {l:'C',t:'Đưa đi viện, đồng thời kiểm tra lại toàn bộ máy cũ',fx:[-15,0,10,-10],out:'Nguy cơ tái diễn được giảm thiểu đáng kể.'}
+        ]},
+        {title:'Khách hàng yêu cầu audit đột xuất',text:'Khách hàng nước ngoài yêu cầu audit nhà máy đột xuất trước khi ký hợp đồng lớn.',opts:[
+          {l:'A',t:'Đồng ý audit ngay, chuẩn bị toàn diện',fx:[0,15,0,-15],out:'Khách hàng đánh giá cao sự chuyên nghiệp, hợp đồng khả quan.'},
+          {l:'B',t:'Xin dời lịch audit, viện lý do đang nâng cấp',fx:[0,-10,0,5],out:'Khách hàng có phần nghi ngại về sự minh bạch.'},
+          {l:'C',t:'Đồng ý audit nhưng chỉ mở khu vực đã sẵn sàng',fx:[0,5,0,-8],out:'Audit diễn ra suôn sẻ trong phạm vi cho phép.'}
+        ]},
+        {title:'Giá điện công nghiệp tăng',text:'Giá điện công nghiệp tăng khiến chi phí vận hành nhà máy đội lên đáng kể.',opts:[
+          {l:'A',t:'Đầu tư hệ thống điện năng lượng mặt trời',fx:[-20,10,0,-5],out:'Chi phí điện giảm dần về lâu dài.'},
+          {l:'B',t:'Cắt giảm giờ vận hành để tiết kiệm điện',fx:[5,-5,-10,0],out:'Sản lượng giảm, công nhân lo lắng về thu nhập.'},
+          {l:'C',t:'Tối ưu ca vận hành vào giờ điện thấp điểm',fx:[-5,0,-3,-8],out:'Chi phí điện giảm nhẹ mà không ảnh hưởng nhiều đến lương.'}
+        ]},
+        {title:'Đối thủ lôi kéo kỹ sư giỏi',text:'Một đối thủ cạnh tranh cố tình lôi kéo đội ngũ kỹ thuật giỏi nhất của nhà máy.',opts:[
+          {l:'A',t:'Tăng lương và phúc lợi giữ người ngay',fx:[-15,0,15,0],out:'Đội kỹ thuật nòng cốt quyết định ở lại.'},
+          {l:'B',t:'Để họ ra đi, tuyển và đào tạo người mới',fx:[5,0,-10,-10],out:'Mất thời gian đào tạo lại từ đầu.'},
+          {l:'C',t:'Giữ người chủ chốt nhất, chấp nhận mất vài người',fx:[-8,0,5,-5],out:'Giữ được nòng cốt quan trọng nhất của xưởng.'}
+        ]},
+        {title:'Đơn hàng xuất khẩu lớn nhất năm',text:'Đơn hàng xuất khẩu lớn nhất năm cần giao gấp cuối tuần, dây chuyền phải chạy hết công suất.',opts:[
+          {l:'A',t:'Chạy hết công suất 3 ca, thưởng nóng cho công nhân',fx:[-10,15,10,-15],out:'Đơn hàng giao đúng hẹn, công nhân phấn khởi vì thưởng nóng.'},
+          {l:'B',t:'Giao đúng năng lực hiện tại, chấp nhận trễ một phần',fx:[0,-10,5,0],out:'Khách hàng không hài lòng vì giao thiếu đúng hẹn.'},
+          {l:'C',t:'Thuê thêm nhân công thời vụ để chia sẻ áp lực',fx:[-15,10,5,-8],out:'Đơn hàng hoàn thành trọn vẹn, công nhân đỡ áp lực hơn.'}
+        ]},
+        {title:'Tập đoàn mẹ yêu cầu cắt giảm chi phí',text:'Ban giám đốc tập đoàn mẹ yêu cầu báo cáo cắt giảm 10% chi phí vận hành quý tới.',opts:[
+          {l:'A',t:'Cam kết cắt giảm bằng tinh gọn nhân sự gián tiếp',fx:[15,0,-15,0],out:'Tập đoàn mẹ hài lòng nhưng nội bộ xáo trộn.'},
+          {l:'B',t:'Từ chối, trình bày rủi ro nếu cắt giảm lúc này',fx:[-10,5,0,-8],out:'Tập đoàn mẹ tạm chấp nhận, ghi nhận rủi ro đã nêu.'},
+          {l:'C',t:'Đề xuất cắt giảm bằng tối ưu quy trình',fx:[5,0,5,-15],out:'Chi phí giảm nhẹ mà không ai bị ảnh hưởng trực tiếp.'}
+        ]}
+      ]
+    }
+  };
+
+  var RANDOM_POOL = [
+    {title:'Nhân viên báo ốm',text:'Một nhân viên báo ốm đột xuất, xin nghỉ hôm nay.',opts:[
+      {l:'A',t:'Cho nghỉ, sắp xếp người khác gánh việc',fx:[0,0,8,-5],out:'Mọi người thông cảm, công việc vẫn ổn.'},
+      {l:'B',t:'Gọi thúc ép đi làm vì đang thiếu người',fx:[3,0,-12,0],out:'Nhân viên đi làm nhưng ấm ức ra mặt.'}
+    ]},
+    {title:'Nhân viên mệt mỏi xin về sớm',text:'Một nhân viên trông mệt mỏi, xin phép về sớm hôm nay.',opts:[
+      {l:'A',t:'Đồng ý cho về sớm',fx:[0,0,6,0],out:'Nhân viên cảm ơn, tinh thần khá hơn hẳn.'},
+      {l:'B',t:'Nhắc nhở cố gắng hoàn thành ca làm',fx:[2,0,-8,0],out:'Nhân viên miễn cưỡng ở lại làm nốt.'}
+    ]},
+    {title:'Việc gấp phát sinh',text:'Khách hàng gọi điện yêu cầu xử lý một việc gấp ngoài kế hoạch.',opts:[
+      {l:'A',t:'Ưu tiên xử lý ngay, gác việc khác lại',fx:[0,6,0,-8],out:'Khách hàng hài lòng vì được xử lý nhanh.'},
+      {l:'B',t:'Xếp vào hàng đợi, xử lý theo thứ tự',fx:[0,-6,0,0],out:'Khách hàng có phần sốt ruột chờ đợi.'}
+    ]},
+    {title:'Sự cố hệ thống nhỏ',text:'Hệ thống nội bộ trục trặc nhẹ, công việc buổi sáng bị gián đoạn.',opts:[
+      {l:'A',t:'Gọi kỹ thuật xử lý ngay, chấp nhận tốn phí',fx:[-6,0,3,0],out:'Hệ thống hoạt động trở lại sau ít phút.'},
+      {l:'B',t:'Chờ tự khắc phục, làm việc thủ công tạm thời',fx:[0,-3,-3,-3],out:'Cả ngày làm việc hơi lộn xộn.'}
+    ]},
+    {title:'Mâu thuẫn nội bộ nhỏ',text:'Hai nhân viên tranh cãi nhỏ về phân công công việc.',opts:[
+      {l:'A',t:'Đứng ra hoà giải ngay',fx:[0,0,6,-5],out:'Cả hai làm hoà, không khí dễ chịu trở lại.'},
+      {l:'B',t:'Để họ tự giải quyết với nhau',fx:[0,0,-5,3],out:'Mâu thuẫn âm ỉ chưa được giải quyết.'}
+    ]},
+    {title:'Được khen bất ngờ',text:'Một khách hàng/đối tác bất ngờ khen ngợi chất lượng công việc gần đây.',opts:[
+      {l:'A',t:'Cảm ơn, chia sẻ lời khen với cả đội',fx:[0,4,8,0],out:'Cả đội phấn khởi hẳn lên.'},
+      {l:'B',t:'Ghi nhận nhưng không nói gì thêm',fx:[0,4,0,0],out:'Một tin vui lặng lẽ trôi qua.'}
+    ]},
+    {title:'Sáng kiến nhỏ từ nhân viên',text:'Một nhân viên đề xuất một cải tiến nhỏ trong quy trình làm việc.',opts:[
+      {l:'A',t:'Áp dụng thử ngay',fx:[-3,0,8,-3],out:'Cải tiến giúp mọi người đỡ vất vả hơn một chút.'},
+      {l:'B',t:'Cảm ơn nhưng chưa áp dụng',fx:[0,0,-5,0],out:'Nhân viên hơi hụt hẫng vì ý kiến không được dùng.'}
+    ]},
+    {title:'Thời tiết xấu',text:'Thời tiết xấu bất ngờ khiến công việc hôm nay bị ảnh hưởng ít nhiều.',opts:[
+      {l:'A',t:'Chủ động điều chỉnh kế hoạch trong ngày',fx:[-3,3,0,-3],out:'Mọi việc vẫn trôi qua ổn thoả.'},
+      {l:'B',t:'Giữ nguyên kế hoạch, chấp nhận rủi ro',fx:[3,-6,0,0],out:'Vài việc bị ảnh hưởng ngoài dự kiến.'}
+    ]},
+    {title:'Khách hàng phàn nàn nhỏ',text:'Một khách hàng phàn nàn nhẹ về một chi tiết nhỏ trong dịch vụ.',opts:[
+      {l:'A',t:'Xin lỗi, xử lý ngay trong ngày',fx:[-3,6,0,0],out:'Khách hàng hài lòng vì được quan tâm nhanh.'},
+      {l:'B',t:'Ghi nhận, hẹn xử lý sau',fx:[0,-5,0,3],out:'Khách hàng có phần không hài lòng vì chờ đợi.'}
+    ]},
+    {title:'Nhân viên xin ứng lương',text:'Một nhân viên gặp khó khăn tài chính, xin ứng trước một phần lương.',opts:[
+      {l:'A',t:'Đồng ý ứng lương',fx:[-6,0,8,0],out:'Nhân viên rất biết ơn vì được giúp đỡ kịp thời.'},
+      {l:'B',t:'Từ chối, giải thích quy định chung',fx:[0,0,-6,0],out:'Nhân viên có phần buồn nhưng vẫn hiểu.'}
+    ]},
+    {title:'Khám sức khoẻ định kỳ',text:'Đến đợt khám sức khoẻ định kỳ cho nhân viên, cần quyết định ngân sách.',opts:[
+      {l:'A',t:'Chi đầy đủ cho cả đội khám tổng quát',fx:[-8,0,8,3],out:'Nhân viên cảm thấy được quan tâm thật sự.'},
+      {l:'B',t:'Chỉ khám tối thiểu theo quy định',fx:[2,0,-3,0],out:'Một số nhân viên hơi thất vọng.'}
+    ]},
+    {title:'Áp lực deadline cuối tuần',text:'Khối lượng công việc dồn lại khiến cả đội áp lực để kịp deadline cuối tuần.',opts:[
+      {l:'A',t:'Sếp cùng làm xuyên trưa với đội',fx:[0,3,6,-8],out:'Đội ngũ cảm kích vì sếp đồng hành.'},
+      {l:'B',t:'Để đội tự xoay xở, sếp lo việc khác',fx:[0,0,-6,3],out:'Đội hơi chạnh lòng nhưng vẫn kịp deadline.'}
+    ]},
+    {title:'Nhân viên đi trễ',text:'Một nhân viên đi làm trễ vì kẹt xe, trong khi khách hàng đang chờ ở quầy.',opts:[
+      {l:'A',t:'Thông cảm, nhắc nhở nhẹ nhàng',fx:[0,0,5,0],out:'Nhân viên biết ơn vì được thông cảm.'},
+      {l:'B',t:'Trừ lương theo quy định',fx:[3,0,-8,0],out:'Nhân viên chấp hành nhưng không vui.'}
+    ]},
+    {title:'Thiết bị hỏng đột xuất',text:'Thiết bị làm việc chính (máy in, máy tính, máy móc) bị hỏng đột xuất giữa giờ làm.',opts:[
+      {l:'A',t:'Sửa/mua mới ngay để không gián đoạn',fx:[-8,0,3,0],out:'Công việc trở lại bình thường nhanh chóng.'},
+      {l:'B',t:'Dùng tạm thiết bị cũ, để dành ngân sách',fx:[3,0,-3,-3],out:'Công việc chậm hơn một chút nhưng vẫn ổn.'}
+    ]},
+    {title:'Đối tác mời hợp tác nhỏ',text:'Một đối tác mới ngỏ ý hợp tác quy mô nhỏ, không quá rủi ro.',opts:[
+      {l:'A',t:'Nhận lời hợp tác thử nghiệm',fx:[5,3,0,-3],out:'Một nguồn thu nhỏ nhưng ổn định xuất hiện.'},
+      {l:'B',t:'Từ chối, tập trung việc hiện tại',fx:[0,0,0,3],out:'Bỏ lỡ cơ hội nhỏ nhưng đỡ phải lo thêm việc.'}
+    ]},
+    {title:'Xin nghỉ phép đột xuất',text:'Một nhân viên có việc gia đình gấp, xin nghỉ phép ngay trong ngày.',opts:[
+      {l:'A',t:'Duyệt nghỉ phép ngay, không hỏi nhiều',fx:[0,0,8,-3],out:'Nhân viên rất cảm kích vì được thấu hiểu.'},
+      {l:'B',t:'Yêu cầu sắp xếp bàn giao trước khi nghỉ',fx:[0,0,-3,0],out:'Nhân viên hơi căng thẳng nhưng vẫn bàn giao kịp.'}
+    ]}
+  ];
+
+  var HOLIDAY_EVENT = {title:'Ngày Lễ',text:'Hôm nay là ngày lễ quốc gia. Một số nhân viên mong được nghỉ trọn vẹn, nhưng công việc vẫn đang chờ.',opts:[
+    {l:'A',t:'Cho nghỉ lễ đầy đủ, công việc chờ hôm sau',fx:[-5,0,12,5],out:'Nhân viên rất vui vì được nghỉ đúng nghĩa.'},
+    {l:'B',t:'Vẫn làm việc, trả thêm phụ cấp ngày lễ',fx:[5,3,-5,-5],out:'Công việc không bị gián đoạn nhưng ai cũng có phần mệt.'},
+    {l:'C',t:'Làm nửa ngày, nghỉ nửa ngày còn lại',fx:[0,0,5,-3],out:'Một giải pháp dung hoà được cả đội đón nhận.'}
+  ]};
+
+  var TET_EVENT = {title:'Cận Tết',text:'Không khí Tết đã cận kề, nhân viên đang mong ngóng thưởng Tết và lịch nghỉ.',opts:[
+    {l:'A',t:'Công bố mức thưởng Tết hậu hĩnh',fx:[-15,5,20,0],out:'Cả công ty háo hức đón Tết trong niềm vui.'},
+    {l:'B',t:'Thưởng Tết ở mức tối thiểu vì ngân sách hạn hẹp',fx:[8,-5,-15,0],out:'Nhân viên có phần chạnh lòng khi so với năm ngoái.'},
+    {l:'C',t:'Thưởng vừa phải, kèm lời cảm ơn chân thành',fx:[-5,3,8,0],out:'Mức thưởng vừa phải nhưng ai cũng cảm nhận được sự trân trọng.'}
+  ]};
+
+  var ENDMONTH_EVENT = {title:'Tổng Kết Cuối Tháng',text:'Cuối tháng đã đến, nhân viên mong chờ buổi tổng kết và một khoản thưởng nóng cho nỗ lực cả tháng qua.',opts:[
+    {l:'A',t:'Công bố thưởng nóng hậu hĩnh cho cả đội',fx:[-15,5,20,0],out:'Cả đội phấn khởi, cảm thấy công sức được ghi nhận xứng đáng.'},
+    {l:'B',t:'Thưởng ở mức tối thiểu vì ngân sách hạn hẹp',fx:[8,-5,-15,0],out:'Nhân viên có phần chạnh lòng vì kỳ vọng thưởng cao hơn.'},
+    {l:'C',t:'Thưởng vừa phải, kèm lời cảm ơn chân thành',fx:[-5,3,8,0],out:'Mức thưởng vừa phải nhưng ai cũng cảm nhận được sự trân trọng.'}
+  ]};
+
+  var ENDINGS = {
+    win_legend:{stamp:'good',wl:'win',emoji:'🏆',title:'Đại Thành Công',desc:function(i){return 'Bạn khép lại tháng làm sếp tại '+i.place+' với kết quả vượt kỳ vọng: KPI vượt chỉ tiêu, đội ngũ hài lòng tuyệt đối. Đây là hình mẫu sếp mà ai cũng mơ ước.';}},
+    win_normal:{stamp:'good',wl:'win',emoji:'✅',title:'Hoàn Thành Mục Tiêu Tháng',desc:function(i){return 'KPI tháng của '+i.place+' đã đạt, và đội ngũ vẫn giữ được tinh thần tốt. Một tháng làm sếp thành công, dù không phải mọi thứ đều hoàn hảo.';}},
+    lose_kpi:{stamp:'bad',wl:'lose',emoji:'📉',title:'Không Đạt KPI',desc:function(i){return 'Nhân viên vẫn ổn, nhưng '+i.place+' trượt chỉ tiêu tháng này. Ban giám đốc sẽ không hài lòng với con số cuối tháng.';}},
+    lose_morale:{stamp:'bad',wl:'lose',emoji:'😞',title:'Nhân Viên Chán Nản',desc:function(i){return 'KPI tháng coi như đạt, nhưng '+i.role+' mệt mỏi và mất động lực rõ rệt. Nếu tháng sau vẫn vậy, họ sẽ lần lượt ra đi.';}},
+    lose_both:{stamp:'bad',wl:'lose',emoji:'💔',title:'Vừa Mất Người Vừa Trượt KPI',desc:function(i){return 'Kịch bản tệ nhất: '+i.place+' vừa không đạt chỉ tiêu, vừa khiến đội ngũ chán nản. Tháng sau sẽ còn khó khăn hơn nhiều.';}},
+    lose_bankrupt:{stamp:'bad',wl:'lose',emoji:'💸',title:'Phá Sản',desc:function(i){return 'Quỹ tiền của '+i.place+' về 0 giữa tháng. Không còn tiền trả lương hay duy trì hoạt động, '+i.role+' chính thức đóng cửa.';}},
+    lose_strike:{stamp:'bad',wl:'lose',emoji:'🪧',title:'Nhân Viên Nghỉ Việc Hàng Loạt',desc:function(i){return 'Sức chịu đựng của đội ngũ đã cạn giữa tháng. Họ đồng loạt nghỉ việc, '+i.place+' tê liệt hoàn toàn.';}},
+    lose_scandal:{stamp:'bad',wl:'lose',emoji:'📣',title:'Khủng Hoảng Truyền Thông',desc:function(i){return 'Uy tín của '+i.place+' chạm đáy giữa tháng. Khách hàng quay lưng, đối tác rút lui.';}},
+    lose_collapse:{stamp:'bad',wl:'lose',emoji:'🏥',title:'Sếp Kiệt Sức',desc:function(i){return 'Cơ thể bạn không chịu nổi nữa và phải nhập viện giữa tháng. '+i.place+' phải vận hành mà không có bạn.';}}
+  };
+  var ENDING_KEYS = Object.keys(ENDINGS);
+
+  var state = null;
+
+  function defaultState(){
+    return {screen:'start', selectedMode:'extreme', industryKey:null, mode:null, scheduleData:null,
+      dayCursor:0, epMax:0, epToday:0, fixedDone:{}, emergentDone:[], activeEmergent:null,
+      stats:null, pendingFail:null, actionResultModal:null, dayEndModal:null, endingKey:null, unlocked:loadUnlocked()};
+  }
+
+  function loadUnlocked(){
+    try{ var raw = window.localStorage.getItem('mnls_endings_v3'); return raw ? JSON.parse(raw) : []; }catch(e){ return []; }
+  }
+  function saveUnlocked(key){
+    try{
+      var cur = loadUnlocked();
+      if(cur.indexOf(key)===-1){ cur.push(key); window.localStorage.setItem('mnls_endings_v3', JSON.stringify(cur)); }
+      state.unlocked = cur;
+    }catch(e){}
+  }
+
+  function snapshot(){ try{ window.claude && window.claude.hot && window.claude.hot.snapshot && window.claude.hot.snapshot(state); }catch(e){} }
+
+  function clamp(v){ return Math.max(0, Math.min(100, v)); }
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var tmp=a[i]; a[i]=a[j]; a[j]=tmp; }
+    return a;
+  }
+
+  function pad(n){ return n<10 ? '0'+n : ''+n; }
+  function fmtDate(d){ return WEEKDAY_VN[d.getDay()]+', '+pad(d.getDate())+'/'+pad(d.getMonth()+1); }
+
+  function getTargetMonth(){
+    var now = new Date();
+    var y = now.getFullYear(), m = now.getMonth()+1;
+    m += 1; if(m>12){ m=1; y+=1; }
+    return {year:y, month:m};
+  }
+  function buildWorkDays(year, month){
+    var days = []; var d = new Date(year, month-1, 1);
+    while(d.getMonth()===month-1){
+      var wd = d.getDay();
+      if(wd>=1 && wd<=5) days.push(new Date(d));
+      d.setDate(d.getDate()+1);
+    }
+    return days;
+  }
+  function findHolidayIndex(workDays, month){
+    var fixed = [[1,1],[4,30],[5,1],[9,2]];
+    for(var i=0;i<workDays.length;i++){
+      var d = workDays[i];
+      for(var j=0;j<fixed.length;j++){
+        if(d.getMonth()+1===fixed[j][0] && d.getDate()===fixed[j][1]) return i;
+      }
+    }
+    return Math.floor(workDays.length*0.45);
+  }
+
+  function buildSchedule(key){
+    var industry = INDUSTRIES[key];
+    var tm = getTargetMonth();
+    var workDays = buildWorkDays(tm.year, tm.month);
+    var N = workDays.length;
+    var holidayIdx = findHolidayIndex(workDays, tm.month);
+    var lastIdx = N-1;
+    var exclude = {}; exclude[holidayIdx]=1; exclude[lastIdx]=1;
+    var avail = [];
+    for(var i=0;i<N;i++){ if(!exclude[i]) avail.push(i); }
+    var bigCount = Math.min(10, avail.length);
+    var bigPositions = {};
+    for(var k=0;k<bigCount;k++){
+      var idx = Math.floor((k+0.5)*avail.length/bigCount);
+      bigPositions[avail[idx]] = k;
+    }
+    var pool = shuffle(RANDOM_POOL); var poolIdx = 0;
+    function drawRandom(){ if(poolIdx>=pool.length){ pool=shuffle(RANDOM_POOL); poolIdx=0; } return pool[poolIdx++]; }
+    function toEv(type, src){ return {type:type, title:src.title, text:src.text, opts:src.opts}; }
+    var isTetMonth = (tm.month===1 || tm.month===2);
+    var schedule = [];
+    for(var d=0; d<N; d++){
+      var dayEvs = [];
+      if(bigPositions.hasOwnProperty(d)){
+        dayEvs.push(toEv('big', industry.events[bigPositions[d]]));
+        if(Math.random()<0.35){ dayEvs.push(toEv('random', drawRandom())); }
+      } else if(d===holidayIdx){
+        dayEvs.push(toEv('holiday', HOLIDAY_EVENT));
+      } else if(d===lastIdx){
+        dayEvs.push(toEv(isTetMonth?'tet':'endmonth', isTetMonth?TET_EVENT:ENDMONTH_EVENT));
+      } else {
+        var roll = Math.random(); var count = roll<0.5?1:(roll<0.85?2:3);
+        for(var c=0;c<count;c++){ dayEvs.push(toEv('random', drawRandom())); }
+      }
+      schedule.push(dayEvs);
+    }
+    return {workDays:workDays, days:schedule, monthLabel: MONTH_NAMES_VN[tm.month-1]+' '+tm.year};
+  }
+
+  function computeHeadcount(base, morale){
+    var lost = 0;
+    if(morale<70) lost+=1;
+    if(morale<55) lost+=1;
+    if(morale<40) lost+=2;
+    if(morale<25) lost+=3;
+    if(morale<=10) lost+=3;
+    return Math.max(1, base-lost);
+  }
+  function computeDailyDrift(headcount, base, modeKey){
+    var ratio = headcount/base;
+    var b = MODES[modeKey].driftBase;
+    return Math.round((ratio-b)*5);
+  }
+
+  function checkInstantFail(){
+    var s = state.stats; var floor = MODES[state.mode].failFloor;
+    if(s.money<=floor) return 'lose_bankrupt';
+    if(s.morale<=floor) return 'lose_strike';
+    if(s.rep<=floor) return 'lose_scandal';
+    if(s.energy<=floor) return 'lose_collapse';
+    return null;
+  }
+
+  function evaluateMonthEnd(){
+    var s = state.stats; var kpi = MODES[state.mode].kpi;
+    var moraleOK = s.morale>=50, kpiOK = s.money>=kpi;
+    if(moraleOK && kpiOK){
+      if(s.morale>=80 && s.money>=95 && s.rep>=70 && s.energy>=50) return 'win_legend';
+      return 'win_normal';
+    }
+    if(!moraleOK && !kpiOK) return 'lose_both';
+    if(!kpiOK) return 'lose_kpi';
+    return 'lose_morale';
+  }
+
+  function goEnding(key){
+    state.endingKey = key; state.screen = 'ending';
+    saveUnlocked(key);
+    snapshot(); render();
+  }
+
+  function selectMode(m){ state.selectedMode = m; render(); }
+
+  function beginNewDay(){
+    state.epToday = state.epMax;
+    state.fixedDone = {};
+    var dayEvs = state.scheduleData.days[state.dayCursor];
+    state.emergentDone = dayEvs.map(function(){ return false; });
+    state.activeEmergent = null;
+  }
+
+  function startIndustry(key){
+    var mode = MODES[state.selectedMode||'extreme'];
+    state.industryKey = key;
+    state.mode = state.selectedMode||'extreme';
+    state.scheduleData = buildSchedule(key);
+    state.dayCursor = 0;
+    state.epMax = EP_BY_MODE[state.mode];
+    state.stats = {money:mode.start.money, rep:mode.start.rep, morale:mode.start.morale, energy:mode.start.energy};
+    state.dayEndModal = null; state.actionResultModal = null; state.pendingFail = null; state.endingKey = null;
+    beginNewDay();
+    state.screen = 'dayhub';
+    snapshot(); render();
+  }
+
+  function replaySame(){ state.selectedMode = state.mode; startIndustry(state.industryKey); }
+  function backToStart(){ state = defaultState(); snapshot(); render(); }
+
+  function fxChips(fx){
+    return STAT_ORDER.map(function(k,idx){
+      var v = fx[idx]; if(!v) return '';
+      var cls = v>0?'pos':'neg'; var sign = v>0?'+':'';
+      return '<span class="eff-chip '+cls+'">'+STAT_META[k].icon+' '+sign+v+'</span>';
+    }).join('');
+  }
+  function typeLabelOf(t){ return t==='big' ? '⚡ Sự kiện quan trọng' : t==='holiday' ? '🎉 Ngày Lễ' : t==='tet' ? '🧧 Cận Tết' : t==='endmonth' ? '📊 Tổng kết cuối tháng' : '📌 Việc phát sinh nhỏ'; }
+  function typeIcon(t){ return t==='big'?'⚡':t==='holiday'?'🎉':t==='tet'?'🧧':t==='endmonth'?'📊':'📌'; }
+  function isMinorType(t){ return t==='random'; }
+
+  function doFixedActivity(key){
+    var act = FIXED_ACTIVITIES.filter(function(a){ return a.key===key; })[0];
+    if(state.epToday<act.ep || state.fixedDone[key]) return;
+    var s = state.stats; var deltaArr = [];
+    STAT_ORDER.forEach(function(k,idx){ var before=s[k]; var after=clamp(before+act.fx[idx]); deltaArr.push(after-before); s[k]=after; });
+    state.fixedDone[key] = {out:act.out};
+    state.epToday -= act.ep;
+    state.pendingFail = checkInstantFail();
+    state.actionResultModal = {icon:act.icon, title:act.title, text:act.out, deltaArr:deltaArr, kind:'fixed'};
+    snapshot(); render();
+  }
+
+  function openEmergent(idx){
+    if(state.epToday<=0 || state.emergentDone[idx]) return;
+    state.activeEmergent = idx;
+    render();
+  }
+  function closeEmergent(){ state.activeEmergent = null; render(); }
+
+  function chooseEmergentOption(letter, opt){
+    if(state.emergentDone[state.activeEmergent]) return;
+    var ev = state.scheduleData.days[state.dayCursor][state.activeEmergent];
+    var s = state.stats; var deltaArr = [];
+    STAT_ORDER.forEach(function(k,idx){ var before=s[k]; var after=clamp(before+opt.fx[idx]); deltaArr.push(after-before); s[k]=after; });
+    state.emergentDone[state.activeEmergent] = true;
+    state.epToday--;
+    state.pendingFail = checkInstantFail();
+    state.actionResultModal = {icon:typeIcon(ev.type), title:ev.title, text:opt.out, deltaArr:deltaArr, kind:'emergent'};
+    snapshot(); render();
+  }
+
+  function dismissActionResult(){
+    var kind = state.actionResultModal ? state.actionResultModal.kind : null;
+    state.actionResultModal = null;
+    if(kind==='emergent'){ state.activeEmergent = null; }
+    if(state.pendingFail){ var f = state.pendingFail; state.pendingFail = null; goEnding(f); return; }
+    snapshot(); render();
+  }
+
+  function finishDayAndAdvance(rested, hadPenalty){
+    var industry = INDUSTRIES[state.industryKey];
+    var hc = computeHeadcount(industry.base, state.stats.morale);
+    var drift = computeDailyDrift(hc, industry.base, state.mode);
+    var before = state.stats.money;
+    state.stats.money = clamp(state.stats.money + drift);
+    var actualDrift = state.stats.money - before;
+    var recap = {headcount:hc, drift:actualDrift, rested:rested, penalty:hadPenalty};
+    var fail = checkInstantFail();
+    if(fail){ goEnding(fail); return; }
+    state.dayEndModal = {
+      dateLabel: fmtDate(state.scheduleData.workDays[state.dayCursor]),
+      recap: recap,
+      isLastDay: (state.dayCursor+1 >= state.scheduleData.days.length)
+    };
+    snapshot(); render();
+  }
+
+  function dismissDayEndModal(){
+    state.dayEndModal = null;
+    state.dayCursor++;
+    if(state.dayCursor >= state.scheduleData.days.length){ goEnding(evaluateMonthEnd()); return; }
+    beginNewDay();
+    state.screen = 'dayhub';
+    snapshot(); render();
+  }
+
+  function endDay(restedAll){
+    var dayEvs = state.scheduleData.days[state.dayCursor];
+    var penalized = false;
+    dayEvs.forEach(function(ev, idx){
+      if(!state.emergentDone[idx]){
+        if(isMinorType(ev.type)){
+          state.stats.rep = clamp(state.stats.rep - 3);
+          state.stats.morale = clamp(state.stats.morale - 2);
+        } else {
+          state.stats.rep = clamp(state.stats.rep - 9);
+          state.stats.morale = clamp(state.stats.morale - 6);
+        }
+        penalized = true;
+      }
+    });
+    if(restedAll){ state.stats.energy = clamp(state.stats.energy + 15); }
+    finishDayAndAdvance(restedAll, penalized);
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; });
+  }
+
+  function statRowHtml(key, value, deltaVal){
+    var meta = STAT_META[key];
+    var critical = value<=20;
+    var deltaHtml = '';
+    if(deltaVal){ var cls=deltaVal>0?'pos':'neg'; var sign=deltaVal>0?'+':''; deltaHtml='<span class="delta-badge '+cls+'">'+sign+deltaVal+'</span>'; }
+    var displayVal = value+'/100';
+    var suffix = '';
+    if(key==='money'){
+      var kpi = MODES[state.mode].kpi;
+      displayVal = (value*MONEY_MULT)+' triệu ₫';
+      suffix = ' <small>(mục tiêu '+(kpi*MONEY_MULT)+' triệu)</small>';
+    }
+    var tick = key==='money' ? '<div class="kpi-tick" style="left:'+MODES[state.mode].kpi+'%"></div>' : '';
+    return '<div class="stat-row'+(critical?' critical':'')+'">'+
+      (critical?'<span class="stat-warn">Nguy hiểm</span>':'')+
+      deltaHtml+
+      '<span class="stat-icon">'+meta.icon+'</span>'+
+      '<div class="stat-body">'+
+        '<div class="stat-top"><span class="stat-label">'+meta.label+suffix+'</span><span class="stat-value mono">'+displayVal+'</span></div>'+
+        '<div class="stat-track">'+tick+'<div class="stat-fill" style="width:'+value+'%;background:'+meta.color+'"></div></div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function headcountRowHtml(){
+    var industry = INDUSTRIES[state.industryKey];
+    var hc = computeHeadcount(industry.base, state.stats.morale);
+    var critical = hc <= Math.ceil(industry.base*0.3);
+    var pct = Math.round(hc/industry.base*100);
+    return '<div class="stat-row span2'+(critical?' critical':'')+'">'+
+      (critical?'<span class="stat-warn">Nguy hiểm</span>':'')+
+      '<span class="stat-icon">👥</span>'+
+      '<div class="stat-body">'+
+        '<div class="stat-top"><span class="stat-label">Số nhân viên</span><span class="stat-value mono">'+hc+' / '+industry.base+' người</span></div>'+
+        '<div class="stat-track"><div class="stat-fill" style="width:'+pct+'%;background:var(--stat-morale)"></div></div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function epMeterHtml(){
+    var dots = '';
+    for(var i=0;i<state.epMax;i++){ dots += '<span class="ep-dot'+(i<state.epToday?' filled':'')+'"></span>'; }
+    return '<div class="ep-meter"><span class="ep-label">⚡ Lượt hành động hôm nay</span><div class="ep-dots">'+dots+'</div><span class="ep-count mono">'+state.epToday+'/'+state.epMax+'</span></div>';
+  }
+
+  function headerHtml(){
+    var industry = INDUSTRIES[state.industryKey];
+    var s = state.stats;
+    var sc = state.scheduleData;
+    var dayNo = state.screen==='ending' ? sc.days.length : (state.dayCursor+1);
+    var statsHtml = STAT_ORDER.map(function(k){ return statRowHtml(k, s[k], null); }).join('') + headcountRowHtml();
+    return '<div class="game-header">'+
+      '<div class="header-top">'+
+        '<div class="brandline"><span class="mark">'+industry.icon+'</span><span>'+escapeHtml(industry.name)+'</span></div>'+
+        '<span class="week-pill">'+MODES[state.mode].label+'</span>'+
+      '</div>'+
+      '<div><div class="month-track"><div class="month-fill" style="width:'+(dayNo/sc.days.length*100)+'%"></div></div>'+
+        '<div class="month-label"><span>'+escapeHtml(sc.monthLabel)+' &middot; Ngày làm việc '+dayNo+'/'+sc.days.length+'</span></div></div>'+
+      '<div class="stat-ledger">'+statsHtml+'</div>'+
+    '</div>';
+  }
+
+  function render(){
+    var app = document.getElementById('app');
+    try{ document.body.setAttribute('data-ind', state.industryKey||''); }catch(e){}
+    var html = '';
+    if(state.screen==='start'){ html = renderStart(); }
+    else if(state.screen==='dayhub'){ html = headerHtml() + renderDayhub(); }
+    else if(state.screen==='ending'){ html = renderEnding(); }
+    if(state.actionResultModal){ html += renderActionResultModal(); }
+    else if(state.dayEndModal){ html += renderDayEndModal(); }
+    app.innerHTML = html;
+    bindEvents();
+  }
+
+  function renderStart(){
+    var unlocked = state.unlocked || [];
+    var dots = ENDING_KEYS.map(function(k){ return '<span class="ending-dot'+(unlocked.indexOf(k)!==-1?' on':'')+'" title="'+escapeHtml(ENDINGS[k].title)+'"></span>'; }).join('');
+    var modePills = Object.keys(MODES).map(function(m){
+      return '<button class="mode-pill'+(state.selectedMode===m?' active':'')+'" data-mode="'+m+'">'+MODES[m].label+'</button>';
+    }).join('');
+    var cards = Object.keys(INDUSTRIES).map(function(key){
+      var ind = INDUSTRIES[key];
+      return '<button class="industry-card" data-industry="'+key+'">'+
+        '<div class="industry-illust">'+ILLUST[key]+'</div>'+
+        '<div class="industry-name"><span class="industry-icon">'+ind.icon+'</span>'+escapeHtml(ind.name)+'</div>'+
+        '<div class="industry-teaser">'+escapeHtml(ind.teaser)+' &middot; quy mô '+ind.base+' nhân viên</div>'+
+      '</button>';
+    }).join('');
+    return '<div class="fade-in">'+
+      '<div class="hero-top">'+
+        '<span class="stamp-badge">💼</span>'+
+        '<h1>Một Ngày Làm Sếp</h1>'+
+        '<p>Chọn ngành và mức độ, trải qua <strong>1 tháng làm việc thật</strong> (đúng các ngày trong tháng tới, nghỉ thứ Bảy/Chủ Nhật). Mỗi ngày sếp chỉ có <strong>vài lượt năng lượng</strong> (⚡) để xử lý công việc — hết lượt là phải nghỉ, sang hôm sau. Bạn tự chọn dùng lượt vào <strong>việc phát sinh</strong> (sự kiện quan trọng, có thể để lỡ nhưng sẽ mất điểm) hay <strong>công việc thường ngày</strong> (họp hành, chăm khách, nghỉ giải lao...). Mọi lựa chọn đều hiện rõ sẽ cộng/trừ gì trước khi bấm. Quỹ công ty còn tự thay đổi mỗi ngày theo doanh thu trừ chi phí lương, tuỳ vào số nhân viên bạn còn giữ được. Để <strong>THẮNG</strong>, cuối tháng phải vừa đạt <strong>KPI tài chính</strong> vừa giữ <strong>nhân viên hài lòng</strong>.</p>'+
+      '</div>'+
+      '<div class="mode-row">'+modePills+'</div>'+
+      '<div class="mode-hint">Dễ: KPI thấp, dư sức khoẻ &middot; Khó: cân bằng &middot; Siêu Khó: KPI cao, ít dư địa sai lầm</div>'+
+      '<div class="industry-grid">'+cards+'</div>'+
+      '<div class="gallery-box"><span class="label">Bộ sưu tập kết cục: <span class="count mono">'+unlocked.length+'/'+ENDING_KEYS.length+'</span></span><div class="ending-dots">'+dots+'</div></div>'+
+    '</div>';
+  }
+
+  function renderDayhub(){
+    var sc = state.scheduleData;
+    var dayEvs = sc.days[state.dayCursor];
+    if(state.activeEmergent!==null){ return renderEmergentDetail(dayEvs[state.activeEmergent]); }
+    var date = sc.workDays[state.dayCursor];
+    var epEmpty = state.epToday<=0;
+    var emergentHtml = dayEvs.map(function(ev, idx){
+      var done = state.emergentDone[idx];
+      if(done){
+        return '<div class="activity-card done"><span class="activity-icon">'+typeIcon(ev.type)+'</span><div class="activity-body"><div class="activity-title">'+escapeHtml(ev.title)+' <span class="tag-done">✅ Đã xử lý</span></div></div></div>';
+      }
+      return '<button class="activity-card acc-'+ev.type+(epEmpty?' locked':'')+'" data-emergent="'+idx+'" '+(epEmpty?'disabled':'')+'>'+
+        '<span class="activity-icon">'+typeIcon(ev.type)+'</span>'+
+        '<div class="activity-body"><div class="activity-title">'+escapeHtml(ev.title)+'</div><div class="activity-note">'+typeLabelOf(ev.type)+' &middot; <span class="ep-cost">⚡1</span></div></div>'+
+      '</button>';
+    }).join('');
+    var fixedHtml = FIXED_ACTIVITIES.map(function(a){
+      var done = state.fixedDone[a.key];
+      if(done){
+        return '<div class="fixed-tile tile-'+a.tile+' done"><span class="ft-icon">'+a.icon+'</span><span class="ft-title">'+a.title+'</span><span class="ft-done-tag">✅ Đã làm</span></div>';
+      }
+      var locked = state.epToday<a.ep;
+      return '<button class="fixed-tile tile-'+a.tile+(locked?' locked':'')+'" data-fixed="'+a.key+'" '+(locked?'disabled':'')+'>'+
+        '<span class="ft-icon">'+a.icon+'</span>'+
+        '<span class="ft-title">'+a.title+'</span>'+
+        '<span class="ft-chips">'+fxChips(a.fx)+'</span>'+
+        '<span class="ft-cost">⚡'+a.ep+'</span>'+
+      '</button>';
+    }).join('');
+    return '<div class="panel">'+
+      '<div class="event-tag">'+escapeHtml(sc.monthLabel)+' &middot; Ngày làm việc '+(state.dayCursor+1)+'/'+sc.workDays.length+'</div>'+
+      '<h2>'+fmtDate(date)+'</h2>'+
+      epMeterHtml()+
+      '<h3 class="section-label">Việc phát sinh hôm nay</h3>'+
+      '<div class="activity-list">'+emergentHtml+'</div>'+
+      '<h3 class="section-label">Công việc thường ngày</h3>'+
+      '<div class="fixed-grid">'+fixedHtml+'</div>'+
+      '<div class="daychoice-actions">'+
+        '<button class="btn-rest" id="btn-rest-all">🛌 Nghỉ nguyên ngày hôm nay</button>'+
+        '<button class="btn-primary" id="btn-end-day">🌙 Kết thúc ngày, sang hôm sau</button>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function renderEmergentDetail(ev){
+    var done = state.emergentDone[state.activeEmergent];
+    var opts = ev.opts.map(function(o){
+      return '<button class="choice-btn" data-letter="'+o.l+'" '+(done?'disabled':'')+'>'+
+        '<span class="choice-letter">'+o.l+'</span>'+
+        '<span class="choice-label">'+escapeHtml(o.t)+'</span>'+
+      '</button>';
+    }).join('');
+    return '<div class="panel">'+
+      '<button class="link-back" id="btn-cancel-emergent">← Quay lại danh sách</button>'+
+      '<div class="event-tag type-'+ev.type+'">'+typeLabelOf(ev.type)+'</div>'+
+      '<h2>'+escapeHtml(ev.title)+'</h2>'+
+      '<p class="narrative">'+escapeHtml(ev.text)+'</p>'+
+      '<div class="choice-list">'+opts+'</div>'+
+    '</div>';
+  }
+
+  function renderActionResultModal(){
+    var m = state.actionResultModal;
+    return '<div class="modal-backdrop"><div class="modal-box">'+
+      '<div class="modal-eyebrow">Kết quả</div>'+
+      '<h2>'+m.icon+' '+escapeHtml(m.title)+'</h2>'+
+      '<p class="narrative">'+escapeHtml(m.text)+'</p>'+
+      '<div class="result-effects">'+fxChips(m.deltaArr)+'</div>'+
+      '<button class="btn-primary" id="btn-dismiss-result">Đã hiểu</button>'+
+    '</div></div>';
+  }
+
+  function renderDayEndModal(){
+    var m = state.dayEndModal; var r = m.recap;
+    var dcls = r.drift>0?'pos':(r.drift<0?'neg':'zero'); var dsign = r.drift>0?'+':'';
+    var penaltyNote = r.penalty ? '<p style="color:var(--critical);font-weight:700;margin-top:8px;">⚠️ Có việc phát sinh bị bỏ lỡ hôm qua, đã bị trừ Uy tín &amp; Tinh thần nhân viên.</p>' : '';
+    return '<div class="modal-backdrop"><div class="modal-box">'+
+      '<div class="modal-eyebrow">🌙 Kết thúc ngày</div>'+
+      '<h2>'+escapeHtml(m.dateLabel)+'</h2>'+
+      '<p class="narrative">'+(r.rested?'Bạn đã nghỉ nguyên ngày hôm nay.':'Một ngày làm việc nữa đã khép lại.')+' Đội ngũ hiện còn <strong>'+r.headcount+'</strong> người, doanh thu trừ chi phí lương hôm nay: <span class="eff-chip '+dcls+'">'+dsign+r.drift+'</span>.</p>'+
+      penaltyNote+
+      '<button class="btn-primary" id="btn-dismiss-dayend">'+(m.isLastDay?'Xem kết quả tháng':'Sang ngày mới →')+'</button>'+
+    '</div></div>';
+  }
+
+  function renderEnding(){
+    var industry = INDUSTRIES[state.industryKey];
+    var ending = ENDINGS[state.endingKey];
+    var stampClass = ending.stamp==='good' ? 'good' : '';
+    var s = state.stats;
+    var statsHtml = STAT_ORDER.map(function(k){ return statRowHtml(k, s[k], null); }).join('') + headcountRowHtml();
+    return '<div class="ending-screen fade-in">'+
+      '<div class="win-lose-pill '+ending.wl+'">'+(ending.wl==='win'?'✅ THẮNG':'❌ THUA')+'</div>'+
+      '<div><span class="ending-stamp '+stampClass+'">'+ending.emoji+'</span></div>'+
+      '<h2 class="ending-title">'+escapeHtml(ending.title)+'</h2>'+
+      '<p class="ending-desc">'+escapeHtml(ending.desc(industry))+'</p>'+
+      '<div class="ending-stats"><h3 class="ledger-heading">📋 Chỉ số cuối tháng</h3><div class="stat-ledger">'+statsHtml+'</div></div>'+
+      '<div class="ending-actions">'+
+        '<button class="btn-primary" id="btn-replay">Chơi lại ngành này</button>'+
+        '<button class="btn-secondary" id="btn-back">Chọn ngành khác</button>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function bindEvents(){
+    var app = document.getElementById('app');
+    var modeBtns = app.querySelectorAll('[data-mode]');
+    modeBtns.forEach(function(btn){ btn.addEventListener('click', function(){ selectMode(btn.getAttribute('data-mode')); }); });
+    var industryCards = app.querySelectorAll('[data-industry]');
+    industryCards.forEach(function(card){ card.addEventListener('click', function(){ startIndustry(card.getAttribute('data-industry')); }); });
+    var fixedBtns = app.querySelectorAll('[data-fixed]');
+    fixedBtns.forEach(function(btn){ btn.addEventListener('click', function(){ doFixedActivity(btn.getAttribute('data-fixed')); }); });
+    var emergentBtns = app.querySelectorAll('[data-emergent]');
+    emergentBtns.forEach(function(btn){ btn.addEventListener('click', function(){ openEmergent(parseInt(btn.getAttribute('data-emergent'),10)); }); });
+    var restAllBtn = document.getElementById('btn-rest-all');
+    if(restAllBtn) restAllBtn.addEventListener('click', function(){ endDay(true); });
+    var endDayBtn = document.getElementById('btn-end-day');
+    if(endDayBtn) endDayBtn.addEventListener('click', function(){ endDay(false); });
+    var cancelBtn = document.getElementById('btn-cancel-emergent');
+    if(cancelBtn) cancelBtn.addEventListener('click', closeEmergent);
+    var backMenuBtn = document.getElementById('btn-back-to-menu');
+    if(backMenuBtn) backMenuBtn.addEventListener('click', closeEmergent);
+    var choiceBtns = app.querySelectorAll('.choice-btn[data-letter]');
+    choiceBtns.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(state.emergentDone[state.activeEmergent]) return;
+        var dayEvs = state.scheduleData.days[state.dayCursor];
+        var ev = dayEvs[state.activeEmergent];
+        var letter = btn.getAttribute('data-letter');
+        var opt = ev.opts.filter(function(o){ return o.l===letter; })[0];
+        chooseEmergentOption(letter, opt);
+      });
+    });
+    var dismissResultBtn = document.getElementById('btn-dismiss-result');
+    if(dismissResultBtn) dismissResultBtn.addEventListener('click', dismissActionResult);
+    var dismissDayEndBtn = document.getElementById('btn-dismiss-dayend');
+    if(dismissDayEndBtn) dismissDayEndBtn.addEventListener('click', dismissDayEndModal);
+    var replayBtn = document.getElementById('btn-replay');
+    if(replayBtn) replayBtn.addEventListener('click', replaySame);
+    var backBtn = document.getElementById('btn-back');
+    if(backBtn) backBtn.addEventListener('click', backToStart);
+  }
+
+  function boot(initial){
+    state = Object.assign(defaultState(), initial||{});
+    render();
+  }
+
+  if(window.claude && window.claude.hot && window.claude.hot.ready){ window.claude.hot.ready(boot); }
+  else { boot(window.claude && window.claude.hot && window.claude.hot.data); }
+})();
+</script>
+</body>
+</html>
