@@ -705,9 +705,6 @@ button{font-family:inherit;}
   function checkInstantFail(){
     var s = state.stats; var floor = MODES[state.mode].failFloor;
     if(s.money<=floor) return 'lose_bankrupt';
-    if(s.morale<=floor) return 'lose_strike';
-    if(s.rep<=floor) return 'lose_scandal';
-    if(s.energy<=floor) return 'lose_collapse';
     return null;
   }
 
@@ -1007,7 +1004,7 @@ button{font-family:inherit;}
       '<strong>📈 Doanh thu mỗi ngày</strong> = 1 triệu × Số nhân viên × (Tinh thần NV / 100).<br>'+
       '<strong>📉 Chi phí mỗi ngày</strong> = 1 triệu vận hành cố định + 0,3 triệu × Số nhân viên.<br>'+
       '<strong>💰 Quỹ công ty</strong> thay đổi mỗi ngày = Doanh thu − Chi phí, cộng dồn với kết quả các việc trong ngày.<br><br>'+
-      '<strong>🏆 Thắng:</strong> cuối tháng Quỹ công ty ≥ '+(mode.kpi*MONEY_MULT)+' triệu (KPI) và Tinh thần nhân viên ≥ 50. Bất kỳ chỉ số nào (Quỹ, Uy tín, Tinh thần, Sức khỏe) tụt xuống ≤ '+mode.failFloor+'/100 giữa tháng là thua ngay lập tức.'+
+      '<strong>🏆 Thắng:</strong> cuối tháng Quỹ công ty ≥ '+(mode.kpi*MONEY_MULT)+' triệu (KPI) và Tinh thần nhân viên ≥ 50. Chỉ có <strong>Quỹ công ty về 0</strong> (không đủ tiền trả lương) mới khiến thua ngay lập tức giữa tháng — các chỉ số khác về 0 không gây thua.'+
       '</p>'+
       '<button class="btn-primary" id="btn-close-rules">Đã hiểu</button>'+
     '</div></div>';
