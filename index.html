@@ -767,7 +767,7 @@ button{font-family:inherit;}
 
   function computeActivityFx(act){
     var fx = act.fx.slice();
-    if(act.key==='earn'){ fx[0] = Math.round(4 + (state.stats.energy/100)*10); }
+    if(act.key==='earn'){ fx[0] = Math.round(2 + (state.stats.energy/100)*6); }
     return fx;
   }
   function fxChips(fx){
