@@ -238,10 +238,10 @@ button{font-family:inherit;}
   };
   var EP_BY_MODE = {extreme:2};
   var FIXED_ACTIVITIES = [
-    {key:'earn', title:'Tìm kiếm đối tác', icon:'💵', ep:1, tile:'money', fx:[7,0,0,-2], out:'Bạn chốt thêm được một khoản doanh thu nhỏ cho công ty.'},
-    {key:'feed', title:'Mua đồ ăn cho nhân viên', icon:'🍱', ep:1, tile:'morale', fx:[-2,0,7,-1], out:'Cả văn phòng vui hẳn lên với phần đồ ăn bất ngờ.'},
-    {key:'hire', title:'Tuyển thêm nhân viên', icon:'🧑‍💼', ep:2, tile:'energy', hire:1, fx:[-10,2,-2,-4], out:'Một nhân sự mới vừa chính thức gia nhập đội ngũ.'},
-    {key:'fire', title:'Sa thải 1 nhân viên', icon:'✂️', ep:1, tile:'rep', hire:-1, fx:[10,-6,-8,-3], out:'Một vị trí bị cắt giảm để tiết kiệm chi phí, không khí văn phòng nặng nề hơn hẳn.'}
+    {key:'earn', title:'Tìm kiếm đối tác', icon:'💰', ep:1, tile:'money', fx:[7,0,0,-1], out:'Bạn chốt thêm được một khoản doanh thu nhỏ cho công ty.'},
+    {key:'feed', title:'Mua đồ ăn cho nhân viên', icon:'🍱', ep:1, tile:'morale', fx:[-2,0,7,0], out:'Cả văn phòng vui hẳn lên với phần đồ ăn bất ngờ.'},
+    {key:'hire', title:'Tuyển thêm nhân viên', icon:'🧑‍💼', ep:2, tile:'energy', hire:1, fx:[-6,0,0,-2], out:'Một nhân sự mới vừa chính thức gia nhập đội ngũ.'},
+    {key:'fire', title:'Sa thải 1 nhân viên', icon:'✂️', ep:1, tile:'rep', hire:-1, fx:[10,-5,-6,-2], out:'Một vị trí bị cắt giảm để tiết kiệm chi phí, không khí văn phòng nặng nề hơn hẳn.'}
   ];
 
   var ILLUST = {
@@ -689,7 +689,7 @@ button{font-family:inherit;}
     return {workDays:workDays, days:schedule, monthLabel: MONTH_NAMES_VN[tm.month-1]+' '+tm.year};
   }
 
-  var FIN_K_REV = 0.1, FIN_K_SAL = 2.5, FIN_K_OH = 2;
+  var FIN_K_REV = 0.13, FIN_K_SAL = 2.5, FIN_K_OH = 1.5;
   function computeDailyFinance(headcount, base, morale){
     var ratio = headcount/base;
     var revenue = ratio*morale*FIN_K_REV;
@@ -1117,9 +1117,9 @@ button{font-family:inherit;}
       '<div class="modal-eyebrow">🌙 Kết thúc ngày</div>'+
       '<h2>'+escapeHtml(m.dateLabel)+'</h2>'+
       '<p class="narrative">'+(r.rested?'Bạn đã nghỉ nguyên ngày hôm nay.':'Một ngày làm việc nữa đã khép lại.')+' Đội ngũ hiện còn <strong>'+r.headcount+'</strong>/'+industry.base+' người.</p>'+
-      '<div class="result-box"><p><strong>Doanh thu</strong> (số NV × tinh thần): '+r.revenue+' triệu<br>'+
-      '<strong>Chi phí</strong> (lương + vận hành): '+r.cost+' triệu<br>'+
-      '<strong>Lợi nhuận hôm nay:</strong> <span class="eff-chip '+pcls+'">'+psign+(r.revenue-r.cost)+' triệu</span></p></div>'+
+      '<div class="result-box"><p>💰 <strong>Doanh thu</strong> (số NV × tinh thần): +'+r.revenue+' triệu<br>'+
+      '💰 <strong>Chi phí</strong> (lương + vận hành): -'+r.cost+' triệu<br>'+
+      '💰 <strong>Lợi nhuận hôm nay:</strong> <span class="eff-chip '+pcls+'">'+psign+(r.revenue-r.cost)+' triệu</span></p></div>'+
       (totalsChips ? '<div class="result-box"><p><strong>Tổng hợp cả ngày:</strong></p><div class="result-effects">'+totalsChips+'</div></p></div>' : '')+
       penaltyNote+
       '<button class="btn-primary" id="btn-dismiss-dayend">'+(m.isLastDay?'Xem kết quả tháng':'Sang ngày mới →')+'</button>'+
