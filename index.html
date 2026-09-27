@@ -862,17 +862,20 @@ button{font-family:inherit;}
     snapshot(); render();
   }
 
+  function round1(x){ return Math.round(x*10)/10; }
   function finishDayAndAdvance(rested, hadPenalty){
     var industry = INDUSTRIES[state.industryKey];
     var hc = state.headcount;
     var fin = computeDailyFinance(hc, state.stats.morale);
-    var profitRounded = Math.round(fin.profit);
+    var revenueDisp = round1(fin.revenue);
+    var costDisp = round1(fin.cost);
+    var profitDisp = round1(revenueDisp - costDisp);
     var before = state.stats.money;
-    state.stats.money = clamp(state.stats.money + profitRounded/MONEY_MULT);
+    state.stats.money = clamp(state.stats.money + profitDisp/MONEY_MULT);
     var actualDrift = state.stats.money - before;
     state.dayTotals.money += actualDrift;
     var totalsArr = STAT_ORDER.map(function(k){ return state.dayTotals[k]; });
-    var recap = {headcount:hc, drift:actualDrift, revenue:Math.round(fin.revenue), cost:Math.round(fin.cost), profit:profitRounded, rested:rested, penalty:hadPenalty, totals:totalsArr};
+    var recap = {headcount:hc, drift:actualDrift, revenue:revenueDisp, cost:costDisp, profit:profitDisp, rested:rested, penalty:hadPenalty, totals:totalsArr};
     var fail = checkInstantFail();
     if(fail){ goEnding(fail); return; }
     state.dayEndModal = {
