@@ -689,7 +689,7 @@ button{font-family:inherit;}
     return {workDays:workDays, days:schedule, monthLabel: MONTH_NAMES_VN[tm.month-1]+' '+tm.year};
   }
 
-  var FIN_SALARY_PER_HEAD = 0.2, FIN_OVERHEAD = 5;
+  var FIN_SALARY_PER_HEAD = 0.3, FIN_OVERHEAD = 5;
   function computeDailyFinance(headcount, morale){
     var revenue = 1 * headcount * (morale/100);
     var cost = headcount*FIN_SALARY_PER_HEAD + FIN_OVERHEAD;
