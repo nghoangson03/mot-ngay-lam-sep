@@ -689,7 +689,7 @@ button{font-family:inherit;}
     return {workDays:workDays, days:schedule, monthLabel: MONTH_NAMES_VN[tm.month-1]+' '+tm.year};
   }
 
-  var FIN_K_REV = 0.13, FIN_K_SAL = 2.5, FIN_K_OH = 1.5;
+  var FIN_K_REV = 0.13, FIN_K_SAL = 2.5, FIN_K_OH = 1;
   function computeDailyFinance(headcount, base, morale){
     var ratio = headcount/base;
     var revenue = ratio*morale*FIN_K_REV;
