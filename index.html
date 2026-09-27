@@ -689,13 +689,12 @@ button{font-family:inherit;}
     return {workDays:workDays, days:schedule, monthLabel: MONTH_NAMES_VN[tm.month-1]+' '+tm.year};
   }
 
-  var FIN_K_REV = 0.13, FIN_K_SAL = 2.5, FIN_K_OH = 1;
-  function computeDailyFinance(headcount, base, morale){
-    var ratio = headcount/base;
-    var revenue = ratio*morale*FIN_K_REV;
-    var cost = ratio*FIN_K_SAL + FIN_K_OH;
+  var FIN_SALARY_PER_HEAD = 0.2, FIN_OVERHEAD = 5;
+  function computeDailyFinance(headcount, morale){
+    var revenue = 1 * headcount * (morale/100);
+    var cost = headcount*FIN_SALARY_PER_HEAD + FIN_OVERHEAD;
     var profit = revenue - cost;
-    return {revenue:revenue, cost:cost, profit:profit, internalDelta:Math.round(profit)};
+    return {revenue:revenue, cost:cost, profit:profit, internalDelta:Math.round(profit/MONEY_MULT)};
   }
 
   function checkInstantFail(){
@@ -852,13 +851,13 @@ button{font-family:inherit;}
   function finishDayAndAdvance(rested, hadPenalty){
     var industry = INDUSTRIES[state.industryKey];
     var hc = state.headcount;
-    var fin = computeDailyFinance(hc, industry.base, state.stats.morale);
+    var fin = computeDailyFinance(hc, state.stats.morale);
     var before = state.stats.money;
     state.stats.money = clamp(state.stats.money + fin.internalDelta);
     var actualDrift = state.stats.money - before;
     state.dayTotals.money += actualDrift;
     var totalsArr = STAT_ORDER.map(function(k){ return state.dayTotals[k]; });
-    var recap = {headcount:hc, drift:actualDrift, revenue:Math.round(fin.revenue*MONEY_MULT), cost:Math.round(fin.cost*MONEY_MULT), rested:rested, penalty:hadPenalty, totals:totalsArr};
+    var recap = {headcount:hc, drift:actualDrift, revenue:Math.round(fin.revenue), cost:Math.round(fin.cost), rested:rested, penalty:hadPenalty, totals:totalsArr};
     var fail = checkInstantFail();
     if(fail){ goEnding(fail); return; }
     state.dayEndModal = {
@@ -1046,18 +1045,17 @@ button{font-family:inherit;}
       var blockedMax = a.hire>0 && state.headcount>=base;
       var blockedMin = a.hire<0 && state.headcount<=1;
       if(done){
-        return '<div class="fixed-tile tile-'+a.tile+' done"><span class="ft-icon">'+a.icon+'</span><span class="ft-title">'+a.title+'</span><span class="ft-done-tag">✅ Đã làm</span></div>';
+        return '<div class="fixed-tile tile-'+a.tile+' done"><span class="ft-title">'+a.title+'</span><span class="ft-done-tag">✅ Đã làm</span></div>';
       }
       if(blockedMax){
-        return '<div class="fixed-tile tile-'+a.tile+' locked"><span class="ft-icon">'+a.icon+'</span><span class="ft-title">'+a.title+'</span><span class="ft-done-tag">Đã đủ người</span></div>';
+        return '<div class="fixed-tile tile-'+a.tile+' locked"><span class="ft-title">'+a.title+'</span><span class="ft-done-tag">Đã đủ người</span></div>';
       }
       if(blockedMin){
-        return '<div class="fixed-tile tile-'+a.tile+' locked"><span class="ft-icon">'+a.icon+'</span><span class="ft-title">'+a.title+'</span><span class="ft-done-tag">Chỉ còn 1 người</span></div>';
+        return '<div class="fixed-tile tile-'+a.tile+' locked"><span class="ft-title">'+a.title+'</span><span class="ft-done-tag">Chỉ còn 1 người</span></div>';
       }
       var locked = state.epToday<a.ep;
       var note = a.key==='earn' ? '<span class="ft-note">theo sức khỏe</span>' : (a.key==='hire' ? '<span class="ft-note">tỉ lệ = uy tín%</span>' : '');
       return '<button class="fixed-tile tile-'+a.tile+(locked?' locked':'')+'" data-fixed="'+a.key+'" '+(locked?'disabled':'')+'>'+
-        '<span class="ft-icon">'+a.icon+'</span>'+
         '<span class="ft-title">'+a.title+'</span>'+
         note+
         '<span class="ft-chips">'+previewChips(a.fx)+'</span>'+
