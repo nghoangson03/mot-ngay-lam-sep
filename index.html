@@ -234,14 +234,14 @@ button{font-family:inherit;}
   var MONTH_NAMES_VN = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
 
   var MODES = {
-    extreme:{label:'Siêu Khó', start:{money:34,rep:38,morale:38,energy:40}, kpi:92, driftBase:0.85, failFloor:20}
+    extreme:{label:'Siêu Khó', start:{money:55,rep:45,morale:48,energy:50}, kpi:92, driftBase:0.85, failFloor:20}
   };
   var EP_BY_MODE = {extreme:2};
   var FIXED_ACTIVITIES = [
-    {key:'earn', title:'Tìm kiếm đối tác', icon:'💰', ep:1, tile:'money', fx:[7,0,0,-1], out:'Bạn chốt thêm được một khoản doanh thu nhỏ cho công ty.'},
-    {key:'feed', title:'Mua đồ ăn cho nhân viên', icon:'🍱', ep:1, tile:'morale', fx:[-2,0,7,0], out:'Cả văn phòng vui hẳn lên với phần đồ ăn bất ngờ.'},
-    {key:'hire', title:'Tuyển thêm nhân viên', icon:'🧑‍💼', ep:2, tile:'energy', hire:1, fx:[-6,0,0,-2], out:'Một nhân sự mới vừa chính thức gia nhập đội ngũ.'},
-    {key:'fire', title:'Sa thải 1 nhân viên', icon:'✂️', ep:1, tile:'rep', hire:-1, fx:[10,-5,-6,-2], out:'Một vị trí bị cắt giảm để tiết kiệm chi phí, không khí văn phòng nặng nề hơn hẳn.'}
+    {key:'earn', title:'Tìm kiếm đối tác', icon:'💰', ep:1, tile:'money', fx:[8,0,0,-1], out:'Bạn chốt thêm được một khoản doanh thu nhỏ cho công ty.'},
+    {key:'feed', title:'Mua đồ ăn cho nhân viên', icon:'🍱', ep:1, tile:'morale', fx:[-2,0,8,0], out:'Cả văn phòng vui hẳn lên với phần đồ ăn bất ngờ.'},
+    {key:'hire', title:'Tuyển thêm nhân viên', icon:'🧑‍💼', ep:2, tile:'energy', hire:1, fx:[-8,0,0,-2], out:'Một nhân sự mới vừa chính thức gia nhập đội ngũ.'},
+    {key:'fire', title:'Sa thải 1 nhân viên', icon:'✂️', ep:1, tile:'rep', hire:-1, fx:[12,-5,-6,-2], out:'Một vị trí bị cắt giảm để tiết kiệm chi phí, không khí văn phòng nặng nề hơn hẳn.'}
   ];
 
   var ILLUST = {
@@ -689,12 +689,17 @@ button{font-family:inherit;}
     return {workDays:workDays, days:schedule, monthLabel: MONTH_NAMES_VN[tm.month-1]+' '+tm.year};
   }
 
-  var FIN_SALARY_PER_HEAD = 0.3, FIN_OVERHEAD = 5;
+  var FIN_SALARY_PER_HEAD = 0.3, FIN_OVERHEAD = 1;
+  function severityMult(dayIdx){
+    if(dayIdx<4) return 0.5;
+    if(dayIdx<8) return 0.75;
+    return 1;
+  }
   function computeDailyFinance(headcount, morale){
     var revenue = 1 * headcount * (morale/100);
     var cost = headcount*FIN_SALARY_PER_HEAD + FIN_OVERHEAD;
     var profit = revenue - cost;
-    return {revenue:revenue, cost:cost, profit:profit, internalDelta:Math.round(profit/MONEY_MULT)};
+    return {revenue:revenue, cost:cost, profit:profit, internalDelta:profit/MONEY_MULT};
   }
 
   function checkInstantFail(){
@@ -733,7 +738,7 @@ button{font-family:inherit;}
     state.fixedDone = {};
     state.dayTotals = {money:0,rep:0,morale:0,energy:0};
     var morale = state.stats.morale;
-    var risk = state.headcount>1 ? (morale<10?0.9 : morale<25?0.6 : morale<40?0.35 : 0) : 0;
+    var risk = state.headcount>1 ? (morale<10?0.9 : morale<25?0.6 : morale<40?0.35 : 0)*severityMult(state.dayCursor) : 0;
     if(Math.random()<risk){
       var pick = ATTRITION_EVENTS[Math.floor(Math.random()*ATTRITION_EVENTS.length)];
       state.scheduleData.days[state.dayCursor].unshift({type:'attrition', title:pick.title, text:pick.text, opts:pick.opts});
@@ -751,7 +756,7 @@ button{font-family:inherit;}
     state.scheduleData = buildSchedule(key);
     state.dayCursor = 0;
     state.epMax = EP_BY_MODE[state.mode];
-    state.headcount = industry.base;
+    state.headcount = Math.max(1, Math.round(industry.base*0.6));
     state.stats = {money:mode.start.money, rep:mode.start.rep, morale:mode.start.morale, energy:mode.start.energy};
     state.dayEndModal = null; state.actionResultModal = null; state.pendingFail = null; state.endingKey = null;
     beginNewDay();
@@ -765,7 +770,8 @@ button{font-family:inherit;}
   function fxChips(fx){
     return STAT_ORDER.map(function(k,idx){
       var v = fx[idx]; if(!v) return '';
-      var display = k==='money' ? v*MONEY_MULT : v;
+      var display = k==='money' ? Math.round(v*MONEY_MULT) : v;
+      if(!display) return '';
       var cls = v>0?'pos':'neg'; var sign = v>0?'+':'';
       return '<span class="eff-chip '+cls+'">'+STAT_META[k].icon+' '+sign+display+'</span>';
     }).join('');
@@ -775,7 +781,8 @@ button{font-family:inherit;}
     return STAT_ORDER.map(function(k,idx){
       var raw = fx[idx]; if(!raw) return '';
       var before = s[k]; var v = clamp(before+raw)-before; if(!v) return '';
-      var display = k==='money' ? v*MONEY_MULT : v;
+      var display = k==='money' ? Math.round(v*MONEY_MULT) : v;
+      if(!display) return '';
       var cls = v>0?'pos':'neg'; var sign = v>0?'+':'';
       return '<span class="eff-chip '+cls+'">'+STAT_META[k].icon+' '+sign+display+'</span>';
     }).join('');
@@ -788,14 +795,13 @@ button{font-family:inherit;}
     var act = FIXED_ACTIVITIES.filter(function(a){ return a.key===key; })[0];
     var industry = INDUSTRIES[state.industryKey];
     if(state.epToday<act.ep || state.fixedDone[key]) return;
-    if(act.hire>0 && state.headcount>=industry.base) return;
     if(act.hire<0 && state.headcount<=1) return;
     var s = state.stats; var deltaArr = [];
     var fx = act.fx.slice();
     var outText = act.out;
     var hireSuccess = null;
     if(key==='earn'){
-      fx[0] = Math.round(3 + (s.energy/100)*8);
+      fx[0] = Math.round(4 + (s.energy/100)*10);
       outText = s.energy>=60 ? 'Sức khỏe tốt giúp bạn đàm phán tự tin, chốt được một hợp đồng khá ổn.' : (s.energy>=30 ? 'Bạn chốt thêm được một khoản doanh thu nhỏ cho công ty.' : 'Quá mệt mỏi khiến buổi đàm phán hời hợt, chỉ mang về một khoản rất nhỏ.');
     }
     if(key==='hire'){
@@ -805,10 +811,10 @@ button{font-family:inherit;}
     addDayTotal(deltaArr);
     if(act.hire){
       if(key==='hire'){
-        if(hireSuccess){ state.headcount = Math.min(industry.base, state.headcount+1); outText = 'Ứng viên đồng ý gia nhập! Một nhân sự mới chính thức về đội.'; }
+        if(hireSuccess){ state.headcount = state.headcount+1; outText = 'Ứng viên đồng ý gia nhập! Một nhân sự mới chính thức về đội.'; }
         else { outText = 'Rất tiếc, ứng viên từ chối lời mời lần này. Công sức tuyển dụng chưa có kết quả.'; }
       } else {
-        state.headcount = Math.max(1, Math.min(industry.base, state.headcount + act.hire));
+        state.headcount = Math.max(1, state.headcount + act.hire);
       }
     }
     state.fixedDone[key] = {out:outText};
@@ -829,10 +835,11 @@ button{font-family:inherit;}
     if(state.emergentDone[state.activeEmergent]) return;
     var ev = state.scheduleData.days[state.dayCursor][state.activeEmergent];
     var industry = INDUSTRIES[state.industryKey];
+    var mult = severityMult(state.dayCursor);
     var s = state.stats; var deltaArr = [];
-    STAT_ORDER.forEach(function(k,idx){ var before=s[k]; var after=clamp(before+opt.fx[idx]); deltaArr.push(after-before); s[k]=after; });
+    STAT_ORDER.forEach(function(k,idx){ var raw=opt.fx[idx]; var scaled = raw<0?Math.round(raw*mult):raw; var before=s[k]; var after=clamp(before+scaled); deltaArr.push(after-before); s[k]=after; });
     addDayTotal(deltaArr);
-    if(opt.hc){ state.headcount = Math.max(1, Math.min(industry.base, state.headcount + opt.hc)); }
+    if(opt.hc){ state.headcount = Math.max(1, state.headcount + opt.hc); }
     state.emergentDone[state.activeEmergent] = true;
     state.epToday--;
     state.pendingFail = checkInstantFail();
@@ -880,15 +887,16 @@ button{font-family:inherit;}
   function endDay(restedAll){
     var dayEvs = state.scheduleData.days[state.dayCursor];
     var penalized = false;
+    var mult = severityMult(state.dayCursor);
     dayEvs.forEach(function(ev, idx){
       if(!state.emergentDone[idx]){
         var repBefore = state.stats.rep, moraleBefore = state.stats.morale;
         if(isMinorType(ev.type)){
-          state.stats.rep = clamp(state.stats.rep - 3);
-          state.stats.morale = clamp(state.stats.morale - 2);
+          state.stats.rep = clamp(state.stats.rep - Math.round(3*mult));
+          state.stats.morale = clamp(state.stats.morale - Math.round(2*mult));
         } else {
-          state.stats.rep = clamp(state.stats.rep - 9);
-          state.stats.morale = clamp(state.stats.morale - 6);
+          state.stats.rep = clamp(state.stats.rep - Math.round(9*mult));
+          state.stats.morale = clamp(state.stats.morale - Math.round(6*mult));
         }
         state.dayTotals.rep += state.stats.rep - repBefore;
         state.dayTotals.morale += state.stats.morale - moraleBefore;
@@ -916,7 +924,7 @@ button{font-family:inherit;}
     var suffix = '';
     if(key==='money'){
       var kpi = MODES[state.mode].kpi;
-      displayVal = (value*MONEY_MULT)+' triệu ₫';
+      displayVal = Math.round(value*MONEY_MULT)+' triệu ₫';
       suffix = ' <small>(mục tiêu '+(kpi*MONEY_MULT)+' triệu)</small>';
     }
     var tick = key==='money' ? '<div class="kpi-tick" style="left:'+MODES[state.mode].kpi+'%"></div>' : '';
@@ -935,12 +943,12 @@ button{font-family:inherit;}
     var industry = INDUSTRIES[state.industryKey];
     var hc = state.headcount;
     var critical = hc <= Math.ceil(industry.base*0.3);
-    var pct = Math.round(hc/industry.base*100);
+    var pct = Math.min(100, Math.round(hc/industry.base*100));
     return '<div class="stat-row span2'+(critical?' critical':'')+'">'+
       (critical?'<span class="stat-warn">Nguy hiểm</span>':'')+
       '<span class="stat-icon">👥</span>'+
       '<div class="stat-body">'+
-        '<div class="stat-top"><span class="stat-label">Số nhân viên</span><span class="stat-value mono">'+hc+' / '+industry.base+' người</span></div>'+
+        '<div class="stat-top"><span class="stat-label">Số nhân viên</span><span class="stat-value mono">'+hc+' người (khởi điểm '+industry.base+')</span></div>'+
         '<div class="stat-track"><div class="stat-fill" style="width:'+pct+'%;background:var(--stat-morale)"></div></div>'+
       '</div>'+
     '</div>';
@@ -984,17 +992,22 @@ button{font-family:inherit;}
   }
 
   function renderRulesModal(){
+    var mode = MODES.extreme;
     return '<div class="modal-backdrop"><div class="modal-box">'+
       '<div class="modal-eyebrow">📖 Luật chơi</div>'+
       '<h2>Một Ngày Làm Sếp</h2>'+
       '<p class="narrative">'+
-      '<strong>⚡ Năng lượng hôm nay:</strong> mỗi ngày có số lượt giới hạn, mỗi việc (thường ngày hoặc phát sinh) tốn 1 lượt. Hết lượt phải kết thúc ngày.<br><br>'+
-      '<strong>📌 Việc phát sinh:</strong> không xem trước được kết quả, có thể bỏ qua nhưng việc quan trọng bị bỏ lỡ sẽ bị trừ Uy tín &amp; Tinh thần.<br><br>'+
-      '<strong>🧑‍💼 Tuyển thêm nhân viên:</strong> tỉ lệ thành công = % Uy tín hiện tại, không thể tuyển quá quy mô ban đầu.<br><br>'+
-      '<strong>✂️ Sa thải:</strong> giảm 1 nhân viên ngay, không thể sa thải khi chỉ còn 1 người.<br><br>'+
-      '<strong>💵 Tìm kiếm đối tác:</strong> tiền kiếm được phụ thuộc Sức khỏe hiện tại của sếp.<br><br>'+
-      '<strong>💰 Quỹ công ty mỗi ngày</strong> = Doanh thu (số nhân viên × tinh thần) − Chi phí (lương từng người + vận hành).<br><br>'+
-      '<strong>🏆 Thắng:</strong> cuối tháng đạt KPI quỹ công ty và Tinh thần nhân viên ≥ 50. Để bất kỳ chỉ số nào chạm đáy giữa tháng là thua ngay.'+
+      '<strong>⚡ Năng lượng hôm nay:</strong> mỗi ngày có '+EP_BY_MODE.extreme+' lượt, mỗi việc (thường ngày hoặc phát sinh) tốn 1 lượt (riêng Tuyển thêm nhân viên tốn 2 lượt). Hết lượt phải kết thúc ngày.<br><br>'+
+      '<strong>📌 Việc phát sinh:</strong> không xem trước được kết quả. Có thể bỏ qua, nhưng việc quan trọng bỏ lỡ sẽ bị trừ 9 Uy tín &amp; 6 Tinh thần (việc nhỏ chỉ trừ 3 &amp; 2) — mức phạt này giảm còn 50% trong 4 ngày đầu, 75% ở ngày 5-8, đủ 100% từ ngày 9.<br><br>'+
+      '<strong>🚪 Nhân viên nghỉ việc</strong> là một sự kiện phát sinh, rủi ro xảy ra mỗi ngày tăng dần khi Tinh thần &lt;40 (càng thấp rủi ro càng cao), cũng được giảm nhẹ trong các ngày đầu.<br><br>'+
+      '<strong>🧑‍💼 Tuyển thêm nhân viên:</strong> tỉ lệ thành công = đúng bằng % Uy tín hiện tại. Không giới hạn số lượng có thể tuyển.<br><br>'+
+      '<strong>✂️ Sa thải 1 nhân viên:</strong> giảm ngay 1 người, không thể sa thải khi chỉ còn 1 người.<br><br>'+
+      '<strong>💰 Tìm kiếm đối tác:</strong> tiền kiếm được = 4 đến 14 triệu, tăng theo Sức khỏe hiện tại của sếp (sức khỏe càng cao, đàm phán càng tốt).<br><br>'+
+      '<strong>👥 Nhân viên:</strong> bắt đầu ở mức 60% quy mô tối đa của công ty, tăng/giảm chỉ qua hành động (tuyển/sa thải/nghỉ việc), không tự đổi theo thời gian.<br><br>'+
+      '<strong>📈 Doanh thu mỗi ngày</strong> = 1 triệu × Số nhân viên × (Tinh thần NV / 100).<br>'+
+      '<strong>📉 Chi phí mỗi ngày</strong> = 1 triệu vận hành cố định + 0,3 triệu × Số nhân viên.<br>'+
+      '<strong>💰 Quỹ công ty</strong> thay đổi mỗi ngày = Doanh thu − Chi phí, cộng dồn với kết quả các việc trong ngày.<br><br>'+
+      '<strong>🏆 Thắng:</strong> cuối tháng Quỹ công ty ≥ '+(mode.kpi*MONEY_MULT)+' triệu (KPI) và Tinh thần nhân viên ≥ 50. Bất kỳ chỉ số nào (Quỹ, Uy tín, Tinh thần, Sức khỏe) tụt xuống ≤ '+mode.failFloor+'/100 giữa tháng là thua ngay lập tức.'+
       '</p>'+
       '<button class="btn-primary" id="btn-close-rules">Đã hiểu</button>'+
     '</div></div>';
@@ -1041,14 +1054,9 @@ button{font-family:inherit;}
     }).join('');
     var fixedHtml = FIXED_ACTIVITIES.map(function(a){
       var done = state.fixedDone[a.key];
-      var base = INDUSTRIES[state.industryKey].base;
-      var blockedMax = a.hire>0 && state.headcount>=base;
       var blockedMin = a.hire<0 && state.headcount<=1;
       if(done){
         return '<div class="fixed-tile tile-'+a.tile+' done"><span class="ft-title">'+a.title+'</span><span class="ft-done-tag">✅ Đã làm</span></div>';
-      }
-      if(blockedMax){
-        return '<div class="fixed-tile tile-'+a.tile+' locked"><span class="ft-title">'+a.title+'</span><span class="ft-done-tag">Đã đủ người</span></div>';
       }
       if(blockedMin){
         return '<div class="fixed-tile tile-'+a.tile+' locked"><span class="ft-title">'+a.title+'</span><span class="ft-done-tag">Chỉ còn 1 người</span></div>';
@@ -1114,7 +1122,7 @@ button{font-family:inherit;}
     return '<div class="modal-backdrop"><div class="modal-box">'+
       '<div class="modal-eyebrow">🌙 Kết thúc ngày</div>'+
       '<h2>'+escapeHtml(m.dateLabel)+'</h2>'+
-      '<p class="narrative">'+(r.rested?'Bạn đã nghỉ nguyên ngày hôm nay.':'Một ngày làm việc nữa đã khép lại.')+' Đội ngũ hiện còn <strong>'+r.headcount+'</strong>/'+industry.base+' người.</p>'+
+      '<p class="narrative">'+(r.rested?'Bạn đã nghỉ nguyên ngày hôm nay.':'Một ngày làm việc nữa đã khép lại.')+' Đội ngũ hiện có <strong>'+r.headcount+'</strong> người.</p>'+
       '<div class="result-box"><p>💰 <strong>Doanh thu</strong> (số NV × tinh thần): +'+r.revenue+' triệu<br>'+
       '💰 <strong>Chi phí</strong> (lương + vận hành): -'+r.cost+' triệu<br>'+
       '💰 <strong>Lợi nhuận hôm nay:</strong> <span class="eff-chip '+pcls+'">'+psign+(r.revenue-r.cost)+' triệu</span></p></div>'+
