@@ -234,7 +234,7 @@ button{font-family:inherit;}
   var MONTH_NAMES_VN = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
 
   var MODES = {
-    extreme:{label:'Siêu Khó', start:{money:55,rep:45,morale:48,energy:50}, kpi:92, driftBase:0.85, failFloor:0}
+    extreme:{label:'Trung Bình', start:{money:55,rep:45,morale:48,energy:50}, kpi:92, driftBase:0.85, failFloor:0}
   };
   var EP_BY_MODE = {extreme:2};
   var FIXED_ACTIVITIES = [
@@ -690,6 +690,7 @@ button{font-family:inherit;}
   }
 
   var FIN_SALARY_PER_HEAD = 0.3, FIN_OVERHEAD = 1;
+  var MONEY_EVENT_DAMPEN = 0.5;
   function severityMult(dayIdx){
     if(dayIdx<4) return 0.5;
     if(dayIdx<8) return 0.75;
@@ -764,6 +765,11 @@ button{font-family:inherit;}
   function replaySame(){ state.selectedMode = state.mode; startIndustry(state.industryKey); }
   function backToStart(){ state = defaultState(); snapshot(); render(); }
 
+  function computeActivityFx(act){
+    var fx = act.fx.slice();
+    if(act.key==='earn'){ fx[0] = Math.round(4 + (state.stats.energy/100)*10); }
+    return fx;
+  }
   function fxChips(fx){
     return STAT_ORDER.map(function(k,idx){
       var v = fx[idx]; if(!v) return '';
@@ -794,11 +800,10 @@ button{font-family:inherit;}
     if(state.epToday<act.ep || state.fixedDone[key]) return;
     if(act.hire<0 && state.headcount<=1) return;
     var s = state.stats; var deltaArr = [];
-    var fx = act.fx.slice();
+    var fx = computeActivityFx(act);
     var outText = act.out;
     var hireSuccess = null;
     if(key==='earn'){
-      fx[0] = Math.round(4 + (s.energy/100)*10);
       outText = s.energy>=60 ? 'Sức khỏe tốt giúp bạn đàm phán tự tin, chốt được một hợp đồng khá ổn.' : (s.energy>=30 ? 'Bạn chốt thêm được một khoản doanh thu nhỏ cho công ty.' : 'Quá mệt mỏi khiến buổi đàm phán hời hợt, chỉ mang về một khoản rất nhỏ.');
     }
     if(key==='hire'){
@@ -834,7 +839,12 @@ button{font-family:inherit;}
     var industry = INDUSTRIES[state.industryKey];
     var mult = severityMult(state.dayCursor);
     var s = state.stats; var deltaArr = [];
-    STAT_ORDER.forEach(function(k,idx){ var raw=opt.fx[idx]; var scaled = raw<0?Math.round(raw*mult):raw; var before=s[k]; var after=clamp(before+scaled); deltaArr.push(after-before); s[k]=after; });
+    STAT_ORDER.forEach(function(k,idx){
+      var raw=opt.fx[idx];
+      var scaled = raw<0?Math.round(raw*mult):raw;
+      if(k==='money'){ scaled = Math.round(scaled*MONEY_EVENT_DAMPEN); }
+      var before=s[k]; var after=clamp(before+scaled); deltaArr.push(after-before); s[k]=after;
+    });
     addDayTotal(deltaArr);
     if(opt.hc){ state.headcount = Math.max(1, state.headcount + opt.hc); }
     state.emergentDone[state.activeEmergent] = true;
@@ -856,12 +866,13 @@ button{font-family:inherit;}
     var industry = INDUSTRIES[state.industryKey];
     var hc = state.headcount;
     var fin = computeDailyFinance(hc, state.stats.morale);
+    var profitRounded = Math.round(fin.profit);
     var before = state.stats.money;
-    state.stats.money = clamp(state.stats.money + fin.internalDelta);
+    state.stats.money = clamp(state.stats.money + profitRounded/MONEY_MULT);
     var actualDrift = state.stats.money - before;
     state.dayTotals.money += actualDrift;
     var totalsArr = STAT_ORDER.map(function(k){ return state.dayTotals[k]; });
-    var recap = {headcount:hc, drift:actualDrift, revenue:Math.round(fin.revenue), cost:Math.round(fin.cost), rested:rested, penalty:hadPenalty, totals:totalsArr};
+    var recap = {headcount:hc, drift:actualDrift, revenue:Math.round(fin.revenue), cost:Math.round(fin.cost), profit:profitRounded, rested:rested, penalty:hadPenalty, totals:totalsArr};
     var fail = checkInstantFail();
     if(fail){ goEnding(fail); return; }
     state.dayEndModal = {
@@ -1063,7 +1074,7 @@ button{font-family:inherit;}
       return '<button class="fixed-tile tile-'+a.tile+(locked?' locked':'')+'" data-fixed="'+a.key+'" '+(locked?'disabled':'')+'>'+
         '<span class="ft-title">'+a.title+'</span>'+
         note+
-        '<span class="ft-chips">'+previewChips(a.fx)+'</span>'+
+        '<span class="ft-chips">'+previewChips(computeActivityFx(a))+'</span>'+
         '<span class="ft-cost">⚡'+a.ep+'</span>'+
       '</button>';
     }).join('');
@@ -1113,7 +1124,7 @@ button{font-family:inherit;}
   function renderDayEndModal(){
     var m = state.dayEndModal; var r = m.recap;
     var industry = INDUSTRIES[state.industryKey];
-    var pcls = r.revenue-r.cost>0?'pos':(r.revenue-r.cost<0?'neg':'zero'); var psign = r.revenue-r.cost>0?'+':'';
+    var pcls = r.profit>0?'pos':(r.profit<0?'neg':'zero'); var psign = r.profit>0?'+':'';
     var penaltyNote = r.penalty ? '<p style="color:var(--critical);font-weight:700;margin-top:8px;">⚠️ Có việc phát sinh bị bỏ lỡ hôm qua, đã bị trừ Uy tín &amp; Tinh thần nhân viên.</p>' : '';
     var totalsChips = fxChips(r.totals);
     return '<div class="modal-backdrop"><div class="modal-box">'+
@@ -1122,7 +1133,7 @@ button{font-family:inherit;}
       '<p class="narrative">'+(r.rested?'Bạn đã nghỉ nguyên ngày hôm nay.':'Một ngày làm việc nữa đã khép lại.')+' Đội ngũ hiện có <strong>'+r.headcount+'</strong> người.</p>'+
       '<div class="result-box"><p>💰 <strong>Doanh thu</strong> (số NV × tinh thần): +'+r.revenue+' triệu<br>'+
       '💰 <strong>Chi phí</strong> (lương + vận hành): -'+r.cost+' triệu<br>'+
-      '💰 <strong>Lợi nhuận hôm nay:</strong> <span class="eff-chip '+pcls+'">'+psign+(r.revenue-r.cost)+' triệu</span></p></div>'+
+      '💰 <strong>Lợi nhuận hôm nay:</strong> <span class="eff-chip '+pcls+'">'+psign+r.profit+' triệu</span></p></div>'+
       (totalsChips ? '<div class="result-box"><p><strong>Tổng hợp cả ngày:</strong></p><div class="result-effects">'+totalsChips+'</div></p></div>' : '')+
       penaltyNote+
       '<button class="btn-primary" id="btn-dismiss-dayend">'+(m.isLastDay?'Xem kết quả tháng':'Sang ngày mới →')+'</button>'+
