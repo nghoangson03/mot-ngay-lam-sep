@@ -43,12 +43,6 @@ button{font-family:inherit;}
 .hero-top p{color:var(--room-muted);margin-top:10px;font-size:14.5px;line-height:1.6;}
 .hero-top strong{color:var(--gold);}
 
-.mode-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:18px;}
-.mode-pill{padding:9px 18px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);
-  font-family:var(--f-fun);font-weight:700;font-size:13.5px;cursor:pointer;}
-.mode-pill.active{background:var(--gold);border-color:var(--gold-2);box-shadow:0 0 0 2px rgba(226,178,74,.35);}
-.mode-pill[data-mode="easy"].active{background:var(--felt);border-color:var(--felt-2);color:#fff;box-shadow:0 0 0 2px rgba(30,90,63,.35);}
-.mode-pill[data-mode="extreme"].active{background:var(--critical);border-color:#6e2320;color:#fff;box-shadow:0 0 0 2px rgba(140,47,42,.35);}
 .mode-hint{text-align:center;color:var(--room-muted);font-size:12.5px;margin-top:8px;}
 
 .industry-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px;}
@@ -76,7 +70,8 @@ button{font-family:inherit;}
 .header-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
 .brandline{display:flex;align-items:center;gap:8px;font-family:var(--f-title);font-weight:700;font-size:16px;color:var(--room-ink);}
 .brandline .mark{width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
-.week-pill{background:var(--felt);color:var(--room-ink);border:1px solid var(--felt-2);border-radius:999px;padding:5px 13px;font-size:12.5px;font-weight:700;font-family:var(--f-fun);}
+.week-pill{background:var(--felt);color:var(--room-ink);border:1px solid var(--felt-2);border-radius:999px;padding:5px 13px;font-size:12.5px;font-weight:700;font-family:var(--f-fun);cursor:pointer;}
+.week-pill:hover{filter:brightness(1.15);}
 .month-track{height:7px;border-radius:4px;background:#00000040;overflow:hidden;}
 .month-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold-2),var(--gold));transition:width .5s ease;}
 .month-label{display:flex;justify-content:space-between;font-size:12px;color:var(--room-muted);margin-top:4px;}
@@ -239,16 +234,14 @@ button{font-family:inherit;}
   var MONTH_NAMES_VN = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
 
   var MODES = {
-    easy:{label:'Dễ', start:{money:65,rep:60,morale:65,energy:75}, kpi:60, driftBase:0.5, failFloor:0},
-    hard:{label:'Khó', start:{money:50,rep:50,morale:50,energy:60}, kpi:76, driftBase:0.65, failFloor:6},
-    extreme:{label:'Siêu Khó', start:{money:32,rep:38,morale:38,energy:42}, kpi:90, driftBase:0.85, failFloor:15}
+    extreme:{label:'Siêu Khó', start:{money:34,rep:38,morale:38,energy:40}, kpi:92, driftBase:0.85, failFloor:20}
   };
-  var EP_BY_MODE = {easy:4, hard:3, extreme:2};
+  var EP_BY_MODE = {extreme:2};
   var FIXED_ACTIVITIES = [
-    {key:'earn', title:'Kiếm tiền cho công ty', icon:'💵', ep:1, tile:'money', fx:[7,0,0,-2], out:'Bạn chốt thêm được một khoản doanh thu nhỏ cho công ty.'},
+    {key:'earn', title:'Tìm kiếm đối tác', icon:'💵', ep:1, tile:'money', fx:[7,0,0,-2], out:'Bạn chốt thêm được một khoản doanh thu nhỏ cho công ty.'},
     {key:'feed', title:'Mua đồ ăn cho nhân viên', icon:'🍱', ep:1, tile:'morale', fx:[-2,0,7,-1], out:'Cả văn phòng vui hẳn lên với phần đồ ăn bất ngờ.'},
     {key:'hire', title:'Tuyển thêm nhân viên', icon:'🧑‍💼', ep:2, tile:'energy', hire:1, fx:[-10,2,-2,-4], out:'Một nhân sự mới vừa chính thức gia nhập đội ngũ.'},
-    {key:'client', title:'Chăm sóc khách hàng/đối tác', icon:'🤝', ep:2, tile:'rep', fx:[0,10,0,-3], out:'Một buổi gặp gỡ trọn vẹn giúp giữ mối quan hệ luôn ấm.'}
+    {key:'fire', title:'Sa thải 1 nhân viên', icon:'✂️', ep:1, tile:'rep', hire:-1, fx:[10,-6,-8,-3], out:'Một vị trí bị cắt giảm để tiết kiệm chi phí, không khí văn phòng nặng nề hơn hẳn.'}
   ];
 
   var ILLUST = {
@@ -603,6 +596,7 @@ button{font-family:inherit;}
   function defaultState(){
     return {screen:'start', selectedMode:'extreme', industryKey:null, mode:null, scheduleData:null,
       dayCursor:0, epMax:0, epToday:0, fixedDone:{}, emergentDone:[], activeEmergent:null, headcount:0,
+      dayTotals:{money:0,rep:0,morale:0,energy:0}, showRules:false,
       stats:null, pendingFail:null, actionResultModal:null, dayEndModal:null, endingKey:null, unlocked:loadUnlocked()};
   }
 
@@ -695,10 +689,13 @@ button{font-family:inherit;}
     return {workDays:workDays, days:schedule, monthLabel: MONTH_NAMES_VN[tm.month-1]+' '+tm.year};
   }
 
-  function computeDailyDrift(headcount, base, modeKey){
+  var FIN_K_REV = 0.1, FIN_K_SAL = 2.5, FIN_K_OH = 2;
+  function computeDailyFinance(headcount, base, morale){
     var ratio = headcount/base;
-    var b = MODES[modeKey].driftBase;
-    return Math.round((ratio-b)*5);
+    var revenue = ratio*morale*FIN_K_REV;
+    var cost = ratio*FIN_K_SAL + FIN_K_OH;
+    var profit = revenue - cost;
+    return {revenue:revenue, cost:cost, profit:profit, internalDelta:Math.round(profit)};
   }
 
   function checkInstantFail(){
@@ -728,11 +725,14 @@ button{font-family:inherit;}
     snapshot(); render();
   }
 
-  function selectMode(m){ state.selectedMode = m; render(); }
+  function addDayTotal(deltaArr){
+    STAT_ORDER.forEach(function(k,idx){ state.dayTotals[k] += (deltaArr[idx]||0); });
+  }
 
   function beginNewDay(){
     state.epToday = state.epMax;
     state.fixedDone = {};
+    state.dayTotals = {money:0,rep:0,morale:0,energy:0};
     var morale = state.stats.morale;
     var risk = state.headcount>1 ? (morale<10?0.9 : morale<25?0.6 : morale<40?0.35 : 0) : 0;
     if(Math.random()<risk){
@@ -766,11 +766,22 @@ button{font-family:inherit;}
   function fxChips(fx){
     return STAT_ORDER.map(function(k,idx){
       var v = fx[idx]; if(!v) return '';
+      var display = k==='money' ? v*MONEY_MULT : v;
       var cls = v>0?'pos':'neg'; var sign = v>0?'+':'';
-      return '<span class="eff-chip '+cls+'">'+STAT_META[k].icon+' '+sign+v+'</span>';
+      return '<span class="eff-chip '+cls+'">'+STAT_META[k].icon+' '+sign+display+'</span>';
     }).join('');
   }
-  function typeLabelOf(t){ return t==='big' ? '⚡ Sự kiện quan trọng' : t==='holiday' ? '🎉 Ngày Lễ' : t==='tet' ? '🧧 Cận Tết' : t==='endmonth' ? '📊 Tổng kết cuối tháng' : t==='attrition' ? '🚪 Nhân sự biến động' : '📌 Việc phát sinh nhỏ'; }
+  function previewChips(fx){
+    var s = state.stats;
+    return STAT_ORDER.map(function(k,idx){
+      var raw = fx[idx]; if(!raw) return '';
+      var before = s[k]; var v = clamp(before+raw)-before; if(!v) return '';
+      var display = k==='money' ? v*MONEY_MULT : v;
+      var cls = v>0?'pos':'neg'; var sign = v>0?'+':'';
+      return '<span class="eff-chip '+cls+'">'+STAT_META[k].icon+' '+sign+display+'</span>';
+    }).join('');
+  }
+  function typeLabelOf(t){ return t==='big' ? 'Sự kiện quan trọng' : t==='holiday' ? 'Ngày Lễ' : t==='tet' ? 'Cận Tết' : t==='endmonth' ? 'Tổng kết cuối tháng' : t==='attrition' ? 'Nhân sự biến động' : 'Việc phát sinh nhỏ'; }
   function typeIcon(t){ return t==='big'?'⚡':t==='holiday'?'🎉':t==='tet'?'🧧':t==='endmonth'?'📊':t==='attrition'?'🚪':'📌'; }
   function isMinorType(t){ return t==='random'; }
 
@@ -778,14 +789,33 @@ button{font-family:inherit;}
     var act = FIXED_ACTIVITIES.filter(function(a){ return a.key===key; })[0];
     var industry = INDUSTRIES[state.industryKey];
     if(state.epToday<act.ep || state.fixedDone[key]) return;
-    if(act.hire && state.headcount>=industry.base) return;
+    if(act.hire>0 && state.headcount>=industry.base) return;
+    if(act.hire<0 && state.headcount<=1) return;
     var s = state.stats; var deltaArr = [];
-    STAT_ORDER.forEach(function(k,idx){ var before=s[k]; var after=clamp(before+act.fx[idx]); deltaArr.push(after-before); s[k]=after; });
-    if(act.hire){ state.headcount = Math.min(industry.base, state.headcount + act.hire); }
-    state.fixedDone[key] = {out:act.out};
+    var fx = act.fx.slice();
+    var outText = act.out;
+    var hireSuccess = null;
+    if(key==='earn'){
+      fx[0] = Math.round(3 + (s.energy/100)*8);
+      outText = s.energy>=60 ? 'Sức khỏe tốt giúp bạn đàm phán tự tin, chốt được một hợp đồng khá ổn.' : (s.energy>=30 ? 'Bạn chốt thêm được một khoản doanh thu nhỏ cho công ty.' : 'Quá mệt mỏi khiến buổi đàm phán hời hợt, chỉ mang về một khoản rất nhỏ.');
+    }
+    if(key==='hire'){
+      hireSuccess = Math.random()*100 < s.rep;
+    }
+    STAT_ORDER.forEach(function(k,idx){ var before=s[k]; var after=clamp(before+fx[idx]); deltaArr.push(after-before); s[k]=after; });
+    addDayTotal(deltaArr);
+    if(act.hire){
+      if(key==='hire'){
+        if(hireSuccess){ state.headcount = Math.min(industry.base, state.headcount+1); outText = 'Ứng viên đồng ý gia nhập! Một nhân sự mới chính thức về đội.'; }
+        else { outText = 'Rất tiếc, ứng viên từ chối lời mời lần này. Công sức tuyển dụng chưa có kết quả.'; }
+      } else {
+        state.headcount = Math.max(1, Math.min(industry.base, state.headcount + act.hire));
+      }
+    }
+    state.fixedDone[key] = {out:outText};
     state.epToday -= act.ep;
     state.pendingFail = checkInstantFail();
-    state.actionResultModal = {icon:act.icon, title:act.title, text:act.out, deltaArr:deltaArr, kind:'fixed'};
+    state.actionResultModal = {icon:act.icon, title:act.title, text:outText, deltaArr:deltaArr, kind:'fixed'};
     snapshot(); render();
   }
 
@@ -802,6 +832,7 @@ button{font-family:inherit;}
     var industry = INDUSTRIES[state.industryKey];
     var s = state.stats; var deltaArr = [];
     STAT_ORDER.forEach(function(k,idx){ var before=s[k]; var after=clamp(before+opt.fx[idx]); deltaArr.push(after-before); s[k]=after; });
+    addDayTotal(deltaArr);
     if(opt.hc){ state.headcount = Math.max(1, Math.min(industry.base, state.headcount + opt.hc)); }
     state.emergentDone[state.activeEmergent] = true;
     state.epToday--;
@@ -821,11 +852,13 @@ button{font-family:inherit;}
   function finishDayAndAdvance(rested, hadPenalty){
     var industry = INDUSTRIES[state.industryKey];
     var hc = state.headcount;
-    var drift = computeDailyDrift(hc, industry.base, state.mode);
+    var fin = computeDailyFinance(hc, industry.base, state.stats.morale);
     var before = state.stats.money;
-    state.stats.money = clamp(state.stats.money + drift);
+    state.stats.money = clamp(state.stats.money + fin.internalDelta);
     var actualDrift = state.stats.money - before;
-    var recap = {headcount:hc, drift:actualDrift, rested:rested, penalty:hadPenalty};
+    state.dayTotals.money += actualDrift;
+    var totalsArr = STAT_ORDER.map(function(k){ return state.dayTotals[k]; });
+    var recap = {headcount:hc, drift:actualDrift, revenue:Math.round(fin.revenue*MONEY_MULT), cost:Math.round(fin.cost*MONEY_MULT), rested:rested, penalty:hadPenalty, totals:totalsArr};
     var fail = checkInstantFail();
     if(fail){ goEnding(fail); return; }
     state.dayEndModal = {
@@ -850,6 +883,7 @@ button{font-family:inherit;}
     var penalized = false;
     dayEvs.forEach(function(ev, idx){
       if(!state.emergentDone[idx]){
+        var repBefore = state.stats.rep, moraleBefore = state.stats.morale;
         if(isMinorType(ev.type)){
           state.stats.rep = clamp(state.stats.rep - 3);
           state.stats.morale = clamp(state.stats.morale - 2);
@@ -857,10 +891,16 @@ button{font-family:inherit;}
           state.stats.rep = clamp(state.stats.rep - 9);
           state.stats.morale = clamp(state.stats.morale - 6);
         }
+        state.dayTotals.rep += state.stats.rep - repBefore;
+        state.dayTotals.morale += state.stats.morale - moraleBefore;
         penalized = true;
       }
     });
-    if(restedAll){ state.stats.energy = clamp(state.stats.energy + 15); }
+    if(restedAll){
+      var before = state.stats.energy;
+      state.stats.energy = clamp(state.stats.energy + 15);
+      state.dayTotals.energy += state.stats.energy - before;
+    }
     finishDayAndAdvance(restedAll, penalized);
   }
 
@@ -922,7 +962,7 @@ button{font-family:inherit;}
     return '<div class="game-header">'+
       '<div class="header-top">'+
         '<div class="brandline"><span class="mark">'+industry.icon+'</span><span>'+escapeHtml(industry.name)+'</span></div>'+
-        '<span class="week-pill">'+MODES[state.mode].label+'</span>'+
+        '<button class="week-pill" id="btn-rules" type="button">📖 Luật chơi</button>'+
       '</div>'+
       '<div><div class="month-track"><div class="month-fill" style="width:'+(dayNo/sc.days.length*100)+'%"></div></div>'+
         '<div class="month-label"><span>'+escapeHtml(sc.monthLabel)+' &middot; Ngày làm việc '+dayNo+'/'+sc.days.length+'</span></div></div>'+
@@ -939,16 +979,31 @@ button{font-family:inherit;}
     else if(state.screen==='ending'){ html = renderEnding(); }
     if(state.actionResultModal){ html += renderActionResultModal(); }
     else if(state.dayEndModal){ html += renderDayEndModal(); }
+    else if(state.showRules){ html += renderRulesModal(); }
     app.innerHTML = html;
     bindEvents();
+  }
+
+  function renderRulesModal(){
+    return '<div class="modal-backdrop"><div class="modal-box">'+
+      '<div class="modal-eyebrow">📖 Luật chơi</div>'+
+      '<h2>Một Ngày Làm Sếp</h2>'+
+      '<p class="narrative">'+
+      '<strong>⚡ Năng lượng hôm nay:</strong> mỗi ngày có số lượt giới hạn, mỗi việc (thường ngày hoặc phát sinh) tốn 1 lượt. Hết lượt phải kết thúc ngày.<br><br>'+
+      '<strong>📌 Việc phát sinh:</strong> không xem trước được kết quả, có thể bỏ qua nhưng việc quan trọng bị bỏ lỡ sẽ bị trừ Uy tín &amp; Tinh thần.<br><br>'+
+      '<strong>🧑‍💼 Tuyển thêm nhân viên:</strong> tỉ lệ thành công = % Uy tín hiện tại, không thể tuyển quá quy mô ban đầu.<br><br>'+
+      '<strong>✂️ Sa thải:</strong> giảm 1 nhân viên ngay, không thể sa thải khi chỉ còn 1 người.<br><br>'+
+      '<strong>💵 Tìm kiếm đối tác:</strong> tiền kiếm được phụ thuộc Sức khỏe hiện tại của sếp.<br><br>'+
+      '<strong>💰 Quỹ công ty mỗi ngày</strong> = Doanh thu (số nhân viên × tinh thần) − Chi phí (lương từng người + vận hành).<br><br>'+
+      '<strong>🏆 Thắng:</strong> cuối tháng đạt KPI quỹ công ty và Tinh thần nhân viên ≥ 50. Để bất kỳ chỉ số nào chạm đáy giữa tháng là thua ngay.'+
+      '</p>'+
+      '<button class="btn-primary" id="btn-close-rules">Đã hiểu</button>'+
+    '</div></div>';
   }
 
   function renderStart(){
     var unlocked = state.unlocked || [];
     var dots = ENDING_KEYS.map(function(k){ return '<span class="ending-dot'+(unlocked.indexOf(k)!==-1?' on':'')+'" title="'+escapeHtml(ENDINGS[k].title)+'"></span>'; }).join('');
-    var modePills = Object.keys(MODES).map(function(m){
-      return '<button class="mode-pill'+(state.selectedMode===m?' active':'')+'" data-mode="'+m+'">'+MODES[m].label+'</button>';
-    }).join('');
     var cards = Object.keys(INDUSTRIES).map(function(key){
       var ind = INDUSTRIES[key];
       return '<button class="industry-card" data-industry="'+key+'">'+
@@ -961,10 +1016,9 @@ button{font-family:inherit;}
       '<div class="hero-top">'+
         '<span class="stamp-badge">💼</span>'+
         '<h1>Một Ngày Làm Sếp</h1>'+
-        '<p>Chọn ngành và mức độ, trải qua <strong>1 tháng làm việc thật</strong> (đúng các ngày trong tháng tới, nghỉ thứ Bảy/Chủ Nhật). Mỗi ngày sếp chỉ có <strong>vài lượt năng lượng</strong> (⚡) để xử lý công việc — hết lượt là phải nghỉ, sang hôm sau. Bạn tự chọn dùng lượt vào <strong>việc phát sinh</strong> (sự kiện quan trọng, có thể để lỡ nhưng sẽ mất điểm) hay <strong>công việc thường ngày</strong> (họp hành, chăm khách, nghỉ giải lao...). Mọi lựa chọn đều hiện rõ sẽ cộng/trừ gì trước khi bấm. Quỹ công ty còn tự thay đổi mỗi ngày theo doanh thu trừ chi phí lương, tuỳ vào số nhân viên bạn còn giữ được. Để <strong>THẮNG</strong>, cuối tháng phải vừa đạt <strong>KPI tài chính</strong> vừa giữ <strong>nhân viên hài lòng</strong>.</p>'+
+        '<p>Chọn ngành, trải qua <strong>1 tháng làm việc thật ở mức Siêu Khó</strong> (đúng các ngày trong tháng tới, nghỉ thứ Bảy/Chủ Nhật). Mỗi ngày sếp chỉ có <strong>vài lượt năng lượng</strong> (⚡) để xử lý công việc — hết lượt là phải nghỉ, sang hôm sau. Bạn tự chọn dùng lượt vào <strong>việc phát sinh</strong> (sự kiện quan trọng, có thể để lỡ nhưng sẽ mất điểm) hay <strong>công việc thường ngày</strong> (họp hành, chăm khách, nghỉ giải lao...). Mọi lựa chọn đều hiện rõ sẽ cộng/trừ gì trước khi bấm. Quỹ công ty còn tự thay đổi mỗi ngày theo doanh thu trừ chi phí lương, tuỳ vào số nhân viên bạn còn giữ được. Để <strong>THẮNG</strong>, cuối tháng phải vừa đạt <strong>KPI tài chính</strong> vừa giữ <strong>nhân viên hài lòng</strong>.</p>'+
       '</div>'+
-      '<div class="mode-row">'+modePills+'</div>'+
-      '<div class="mode-hint">Dễ: KPI thấp, dư sức khoẻ &middot; Khó: cân bằng &middot; Siêu Khó: KPI cao, ít dư địa sai lầm</div>'+
+      '<div class="mode-hint">⚠️ Siêu Khó: KPI cao, gần như không có dư địa cho sai lầm</div>'+
       '<div class="industry-grid">'+cards+'</div>'+
       '<div class="gallery-box"><span class="label">Bộ sưu tập kết cục: <span class="count mono">'+unlocked.length+'/'+ENDING_KEYS.length+'</span></span><div class="ending-dots">'+dots+'</div></div>'+
     '</div>';
@@ -988,18 +1042,25 @@ button{font-family:inherit;}
     }).join('');
     var fixedHtml = FIXED_ACTIVITIES.map(function(a){
       var done = state.fixedDone[a.key];
-      var maxedOut = a.hire && state.headcount>=INDUSTRIES[state.industryKey].base;
+      var base = INDUSTRIES[state.industryKey].base;
+      var blockedMax = a.hire>0 && state.headcount>=base;
+      var blockedMin = a.hire<0 && state.headcount<=1;
       if(done){
         return '<div class="fixed-tile tile-'+a.tile+' done"><span class="ft-icon">'+a.icon+'</span><span class="ft-title">'+a.title+'</span><span class="ft-done-tag">✅ Đã làm</span></div>';
       }
-      if(maxedOut){
+      if(blockedMax){
         return '<div class="fixed-tile tile-'+a.tile+' locked"><span class="ft-icon">'+a.icon+'</span><span class="ft-title">'+a.title+'</span><span class="ft-done-tag">Đã đủ người</span></div>';
       }
+      if(blockedMin){
+        return '<div class="fixed-tile tile-'+a.tile+' locked"><span class="ft-icon">'+a.icon+'</span><span class="ft-title">'+a.title+'</span><span class="ft-done-tag">Chỉ còn 1 người</span></div>';
+      }
       var locked = state.epToday<a.ep;
+      var note = a.key==='earn' ? '<span class="ft-note">theo sức khỏe</span>' : (a.key==='hire' ? '<span class="ft-note">tỉ lệ = uy tín%</span>' : '');
       return '<button class="fixed-tile tile-'+a.tile+(locked?' locked':'')+'" data-fixed="'+a.key+'" '+(locked?'disabled':'')+'>'+
         '<span class="ft-icon">'+a.icon+'</span>'+
         '<span class="ft-title">'+a.title+'</span>'+
-        '<span class="ft-chips">'+fxChips(a.fx)+'</span>'+
+        note+
+        '<span class="ft-chips">'+previewChips(a.fx)+'</span>'+
         '<span class="ft-cost">⚡'+a.ep+'</span>'+
       '</button>';
     }).join('');
@@ -1028,7 +1089,7 @@ button{font-family:inherit;}
     }).join('');
     return '<div class="panel">'+
       '<button class="link-back" id="btn-cancel-emergent">← Quay lại danh sách</button>'+
-      '<div class="event-tag type-'+ev.type+'">'+typeLabelOf(ev.type)+'</div>'+
+      '<div class="event-tag type-'+ev.type+'">'+typeIcon(ev.type)+' '+typeLabelOf(ev.type)+'</div>'+
       '<h2>'+escapeHtml(ev.title)+'</h2>'+
       '<p class="narrative">'+escapeHtml(ev.text)+'</p>'+
       '<div class="choice-list">'+opts+'</div>'+
@@ -1048,16 +1109,18 @@ button{font-family:inherit;}
 
   function renderDayEndModal(){
     var m = state.dayEndModal; var r = m.recap;
-    var dcls = r.drift>0?'pos':(r.drift<0?'neg':'zero'); var dsign = r.drift>0?'+':'';
     var industry = INDUSTRIES[state.industryKey];
-    var ratioNote = r.drift>0
-      ? 'Đội ngũ đủ người nên công ty vẫn vận hành trơn tru, có lãi nhẹ.'
-      : (r.drift<0 ? 'Thiếu người so với quy mô ban đầu ('+r.headcount+'/'+industry.base+') khiến công ty vận hành kém hơn, hao hụt quỹ.' : 'Đội ngũ vừa đủ để công ty hoà vốn hôm nay.');
+    var pcls = r.revenue-r.cost>0?'pos':(r.revenue-r.cost<0?'neg':'zero'); var psign = r.revenue-r.cost>0?'+':'';
     var penaltyNote = r.penalty ? '<p style="color:var(--critical);font-weight:700;margin-top:8px;">⚠️ Có việc phát sinh bị bỏ lỡ hôm qua, đã bị trừ Uy tín &amp; Tinh thần nhân viên.</p>' : '';
+    var totalsChips = fxChips(r.totals);
     return '<div class="modal-backdrop"><div class="modal-box">'+
       '<div class="modal-eyebrow">🌙 Kết thúc ngày</div>'+
       '<h2>'+escapeHtml(m.dateLabel)+'</h2>'+
-      '<p class="narrative">'+(r.rested?'Bạn đã nghỉ nguyên ngày hôm nay.':'Một ngày làm việc nữa đã khép lại.')+' Đội ngũ hiện còn <strong>'+r.headcount+'</strong> người. '+ratioNote+' Quỹ công ty hôm nay: <span class="eff-chip '+dcls+'">'+dsign+r.drift+'</span>.</p>'+
+      '<p class="narrative">'+(r.rested?'Bạn đã nghỉ nguyên ngày hôm nay.':'Một ngày làm việc nữa đã khép lại.')+' Đội ngũ hiện còn <strong>'+r.headcount+'</strong>/'+industry.base+' người.</p>'+
+      '<div class="result-box"><p><strong>Doanh thu</strong> (số NV × tinh thần): '+r.revenue+' triệu<br>'+
+      '<strong>Chi phí</strong> (lương + vận hành): '+r.cost+' triệu<br>'+
+      '<strong>Lợi nhuận hôm nay:</strong> <span class="eff-chip '+pcls+'">'+psign+(r.revenue-r.cost)+' triệu</span></p></div>'+
+      (totalsChips ? '<div class="result-box"><p><strong>Tổng hợp cả ngày:</strong></p><div class="result-effects">'+totalsChips+'</div></p></div>' : '')+
       penaltyNote+
       '<button class="btn-primary" id="btn-dismiss-dayend">'+(m.isLastDay?'Xem kết quả tháng':'Sang ngày mới →')+'</button>'+
     '</div></div>';
@@ -1084,8 +1147,10 @@ button{font-family:inherit;}
 
   function bindEvents(){
     var app = document.getElementById('app');
-    var modeBtns = app.querySelectorAll('[data-mode]');
-    modeBtns.forEach(function(btn){ btn.addEventListener('click', function(){ selectMode(btn.getAttribute('data-mode')); }); });
+    var rulesBtn = document.getElementById('btn-rules');
+    if(rulesBtn) rulesBtn.addEventListener('click', function(){ state.showRules = true; render(); });
+    var closeRulesBtn = document.getElementById('btn-close-rules');
+    if(closeRulesBtn) closeRulesBtn.addEventListener('click', function(){ state.showRules = false; render(); });
     var industryCards = app.querySelectorAll('[data-industry]');
     industryCards.forEach(function(card){ card.addEventListener('click', function(){ startIndustry(card.getAttribute('data-industry')); }); });
     var fixedBtns = app.querySelectorAll('[data-fixed]');
